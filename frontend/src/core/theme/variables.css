@@ -1,0 +1,80 @@
+/**
+ * FlowAgent — Design Tokens (CSS Custom Properties)
+ *
+ * Source of truth: ui_ux_design.md §2
+ * Philosophy: "Premium Antigravity" — Dark Mode + Glassmorphism + Neon Accents
+ *
+ * Naming convention: --fa-{category}-{property}-{variant}
+ *   fa = FlowAgent prefix (avoids collisions)
+ */
+
+:root {
+  /* ─── Background ──────────────────────────────────────────────── */
+  --fa-bg-primary: #0B0F19;
+  --fa-bg-secondary: #111827;
+  --fa-bg-gradient: radial-gradient(
+    ellipse at 20% 50%,
+    rgba(0, 240, 255, 0.06) 0%,
+    rgba(139, 92, 246, 0.04) 40%,
+    transparent 70%
+  );
+
+  /* ─── Surface (Glassmorphism) ──────────────────────────────────── */
+  --fa-surface-glass: rgba(255, 255, 255, 0.03);
+  --fa-surface-glass-hover: rgba(255, 255, 255, 0.06);
+  --fa-surface-border: rgba(255, 255, 255, 0.05);
+  --fa-surface-border-hover: rgba(255, 255, 255, 0.10);
+  --fa-surface-blur: 16px;
+
+  /* ─── Text ─────────────────────────────────────────────────────── */
+  --fa-text-primary: rgba(255, 255, 255, 0.95);
+  --fa-text-secondary: rgba(255, 255, 255, 0.60);
+  --fa-text-muted: rgba(255, 255, 255, 0.35);
+
+  /* ─── Accent (Primary) ─────────────────────────────────────────── */
+  --fa-accent-primary: #00F0FF;
+  --fa-accent-primary-dim: rgba(0, 240, 255, 0.15);
+  --fa-accent-primary-glow: 0 0 20px rgba(0, 240, 255, 0.30);
+
+  /* ─── Semantic Colors ──────────────────────────────────────────── */
+  --fa-color-positive: #00FF94;
+  --fa-color-positive-dim: rgba(0, 255, 148, 0.12);
+  --fa-color-warning: #FFB800;
+  --fa-color-warning-dim: rgba(255, 184, 0, 0.12);
+  --fa-color-critical: #FF3366;
+  --fa-color-critical-dim: rgba(255, 51, 102, 0.12);
+
+  /* ─── Typography ───────────────────────────────────────────────── */
+  --fa-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --fa-font-size-xs: 0.75rem;   /* 12px */
+  --fa-font-size-sm: 0.875rem;  /* 14px */
+  --fa-font-size-base: 1rem;    /* 16px */
+  --fa-font-size-lg: 1.25rem;   /* 20px */
+  --fa-font-size-xl: 1.5rem;    /* 24px */
+  --fa-font-size-2xl: 2rem;     /* 32px */
+  --fa-font-size-3xl: 2.5rem;   /* 40px */
+  --fa-font-weight-normal: 400;
+  --fa-font-weight-medium: 500;
+  --fa-font-weight-semibold: 600;
+  --fa-font-weight-bold: 700;
+
+  /* ─── Spacing ──────────────────────────────────────────────────── */
+  --fa-space-xs: 0.25rem;  /* 4px */
+  --fa-space-sm: 0.5rem;   /* 8px */
+  --fa-space-md: 1rem;     /* 16px */
+  --fa-space-lg: 1.5rem;   /* 24px */
+  --fa-space-xl: 2rem;     /* 32px */
+  --fa-space-2xl: 3rem;    /* 48px */
+
+  /* ─── Border Radius ────────────────────────────────────────────── */
+  --fa-radius-sm: 8px;
+  --fa-radius-md: 12px;
+  --fa-radius-lg: 16px;
+  --fa-radius-xl: 24px;
+  --fa-radius-full: 9999px;
+
+  /* ─── Transitions ──────────────────────────────────────────────── */
+  --fa-transition-fast: 150ms ease;
+  --fa-transition-normal: 250ms ease;
+  --fa-transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}

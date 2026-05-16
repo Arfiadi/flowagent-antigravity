@@ -1,0 +1,33 @@
+/**
+ * FlowAgent — Global Styles
+ * Imports all design system modules and sets base resets.
+ */
+@import "./core/theme/variables.css";
+@import "./core/theme/typography.css";
+@import "./core/theme/glassmorphism.css";
+@import "./core/theme/animations.css";
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--fa-font-family);
+  background: var(--fa-bg-primary);
+  color: var(--fa-text-primary);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* Animated background gradient */
+#root {
+  min-height: 100dvh;
+  background: var(--fa-bg-gradient);
+  background-attachment: fixed;
+}
+
+a { color: var(--fa-accent-primary); text-decoration: none; }

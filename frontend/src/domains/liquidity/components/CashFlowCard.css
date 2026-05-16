@@ -1,0 +1,21 @@
+.cashflow-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fa-space-xs);
+  min-width: 0;
+}
+
+.cashflow-card__label {
+  white-space: nowrap;
+}
+
+.cashflow-card__value {
+  font-size: var(--fa-font-size-xl);
+  font-weight: var(--fa-font-weight-bold);
+  color: var(--fa-text-primary);
+  transition: color var(--fa-transition-fast);
+}
+
+.cashflow-card__value--positive { color: var(--fa-color-positive); }
+.cashflow-card__value--warning  { color: var(--fa-color-warning); }
+.cashflow-card__value--critical { color: var(--fa-color-critical); }

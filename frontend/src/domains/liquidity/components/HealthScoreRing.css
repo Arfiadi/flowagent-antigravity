@@ -1,0 +1,62 @@
+.health-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 160px;
+}
+
+.health-ring__svg {
+  width: 100%;
+  height: 100%;
+}
+
+.health-ring__track {
+  stroke: var(--fa-surface-border);
+}
+
+.health-ring__progress {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.health-ring__label {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.health-ring__value {
+  font-size: var(--fa-font-size-2xl);
+  font-weight: var(--fa-font-weight-bold);
+  line-height: 1;
+}
+
+.health-ring__caption {
+  font-size: var(--fa-font-size-xs);
+  color: var(--fa-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+/* ─── Color Variants ─────────────────────────────────────────────── */
+
+.health-ring--low .health-ring__progress {
+  stroke: var(--fa-color-positive);
+  filter: drop-shadow(0 0 8px var(--fa-color-positive));
+}
+.health-ring--low .health-ring__value { color: var(--fa-color-positive); }
+
+.health-ring--medium .health-ring__progress {
+  stroke: var(--fa-color-warning);
+  filter: drop-shadow(0 0 8px var(--fa-color-warning));
+}
+.health-ring--medium .health-ring__value { color: var(--fa-color-warning); }
+
+.health-ring--high .health-ring__progress {
+  stroke: var(--fa-color-critical);
+  filter: drop-shadow(0 0 8px var(--fa-color-critical));
+}
+.health-ring--high .health-ring__value { color: var(--fa-color-critical); }

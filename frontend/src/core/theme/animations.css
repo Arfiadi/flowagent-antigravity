@@ -1,0 +1,118 @@
+/**
+ * FlowAgent — Micro-interaction Keyframes & Animation Utilities
+ *
+ * Source of truth: ui_ux_design.md §4
+ * Provides reusable animations for the "Premium Antigravity" feel.
+ */
+
+/* ─── Shimmer (AI Thinking indicator) ────────────────────────────── */
+@keyframes fa-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(0, 240, 255, 0.08) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: fa-shimmer 2s ease-in-out infinite;
+}
+
+/* ─── Pulse (FAB glow effect) ────────────────────────────────────── */
+@keyframes fa-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.30);
+  }
+  50% {
+    box-shadow: 0 0 32px rgba(0, 240, 255, 0.50);
+  }
+}
+
+.pulse-glow {
+  animation: fa-pulse-glow 3s ease-in-out infinite;
+}
+
+/* ─── Fade Slide Up (Page transitions & card entries) ────────────── */
+@keyframes fa-fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-slide-up {
+  animation: fa-fade-slide-up 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Staggered children — use on parent containers */
+.stagger-children > * {
+  animation: fa-fade-slide-up 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+
+/* ─── Counting Number (Smooth value change) ──────────────────────── */
+@keyframes fa-count-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+    color: var(--fa-accent-primary);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.count-pop {
+  animation: fa-count-pop 0.3s ease;
+}
+
+/* ─── Scan Line (Receipt scanning) ───────────────────────────────── */
+@keyframes fa-scan-line {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--fa-accent-primary), transparent);
+  box-shadow: var(--fa-accent-primary-glow);
+  animation: fa-scan-line 2.5s ease-in-out infinite;
+}
+
+/* ─── Spin (Loading) ─────────────────────────────────────────────── */
+@keyframes fa-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: fa-spin 1s linear infinite;
+}

@@ -1,0 +1,77 @@
+.fa-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fa-space-sm);
+  border: none;
+  border-radius: var(--fa-radius-md);
+  font-family: var(--fa-font-family);
+  font-weight: var(--fa-font-weight-semibold);
+  cursor: pointer;
+  transition:
+    background var(--fa-transition-fast),
+    box-shadow var(--fa-transition-fast),
+    transform var(--fa-transition-fast);
+}
+
+.fa-button:active {
+  transform: scale(0.97);
+}
+
+.fa-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Sizes ──────────────────────────────────────────────────────── */
+
+.fa-button--sm { padding: 6px 14px; font-size: var(--fa-font-size-sm); }
+.fa-button--md { padding: 10px 20px; font-size: var(--fa-font-size-base); }
+.fa-button--lg { padding: 14px 28px; font-size: var(--fa-font-size-lg); }
+
+/* ─── Variants ───────────────────────────────────────────────────── */
+
+.fa-button--primary {
+  background: var(--fa-accent-primary);
+  color: #0B0F19;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+}
+
+.fa-button--primary:hover:not(:disabled) {
+  box-shadow: 0 0 28px rgba(0, 240, 255, 0.45);
+}
+
+.fa-button--ghost {
+  background: transparent;
+  color: var(--fa-text-primary);
+  border: 1px solid var(--fa-surface-border);
+}
+
+.fa-button--ghost:hover:not(:disabled) {
+  background: var(--fa-surface-glass-hover);
+  border-color: var(--fa-surface-border-hover);
+}
+
+.fa-button--positive {
+  background: var(--fa-color-positive);
+  color: #0B0F19;
+  box-shadow: 0 0 16px rgba(0, 255, 148, 0.25);
+}
+
+.fa-button--critical {
+  background: var(--fa-color-critical);
+  color: #fff;
+  box-shadow: 0 0 16px rgba(255, 51, 102, 0.25);
+}
+
+/* ─── Spinner ────────────────────────────────────────────────────── */
+
+.fa-button__spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+}

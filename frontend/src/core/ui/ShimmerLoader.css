@@ -1,0 +1,21 @@
+.shimmer-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fa-space-md);
+  padding: var(--fa-space-xl) 0;
+}
+
+.shimmer-loader__bar {
+  width: 80%;
+  max-width: 280px;
+  height: 4px;
+  border-radius: var(--fa-radius-full);
+  background-color: var(--fa-surface-glass);
+}
+
+.shimmer-loader__text {
+  font-size: var(--fa-font-size-sm);
+  color: var(--fa-text-muted);
+  font-style: italic;
+}

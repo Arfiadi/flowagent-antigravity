@@ -1,0 +1,39 @@
+.pulse-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fa-space-xl);
+  padding: var(--fa-space-lg);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.pulse-dashboard__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fa-space-md);
+  text-align: center;
+}
+
+.pulse-dashboard__header-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fa-space-xs);
+}
+
+.pulse-dashboard__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--fa-space-md);
+}
+
+@media (min-width: 400px) {
+  .pulse-dashboard__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  /* Let the last card span full width if odd number */
+  .pulse-dashboard__grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,0 +1,47 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--fa-radius-full);
+  font-size: var(--fa-font-size-xs);
+  font-weight: var(--fa-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* ─── High (Critical / Merah) ────────────────────────────────────── */
+.status-badge--high {
+  background: var(--fa-color-critical-dim);
+  color: var(--fa-color-critical);
+}
+.status-badge--high .status-badge__dot {
+  background: var(--fa-color-critical);
+  box-shadow: 0 0 6px var(--fa-color-critical);
+}
+
+/* ─── Medium (Warning / Kuning) ──────────────────────────────────── */
+.status-badge--medium {
+  background: var(--fa-color-warning-dim);
+  color: var(--fa-color-warning);
+}
+.status-badge--medium .status-badge__dot {
+  background: var(--fa-color-warning);
+  box-shadow: 0 0 6px var(--fa-color-warning);
+}
+
+/* ─── Low (Aman / Hijau) ─────────────────────────────────────────── */
+.status-badge--low {
+  background: var(--fa-color-positive-dim);
+  color: var(--fa-color-positive);
+}
+.status-badge--low .status-badge__dot {
+  background: var(--fa-color-positive);
+  box-shadow: 0 0 6px var(--fa-color-positive);
+}

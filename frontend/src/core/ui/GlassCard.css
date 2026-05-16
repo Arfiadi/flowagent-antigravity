@@ -1,0 +1,14 @@
+.glass-card {
+  padding: var(--fa-space-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card[role="button"] {
+  cursor: pointer;
+}
+
+.glass-card[role="button"]:focus-visible {
+  outline: 2px solid var(--fa-accent-primary);
+  outline-offset: 2px;
+}

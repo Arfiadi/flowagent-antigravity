@@ -1,0 +1,61 @@
+/**
+ * FlowAgent — Typography
+ *
+ * Source of truth: ui_ux_design.md §1 (Google Fonts: Inter)
+ * Loads the Inter font and defines text utility classes.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ─── Heading Styles ─────────────────────────────────────────────── */
+
+.text-display {
+  font-size: var(--fa-font-size-3xl);
+  font-weight: var(--fa-font-weight-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.text-heading {
+  font-size: var(--fa-font-size-xl);
+  font-weight: var(--fa-font-weight-semibold);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.text-subheading {
+  font-size: var(--fa-font-size-lg);
+  font-weight: var(--fa-font-weight-medium);
+  line-height: 1.3;
+}
+
+/* ─── Body Styles ────────────────────────────────────────────────── */
+
+.text-body {
+  font-size: var(--fa-font-size-base);
+  font-weight: var(--fa-font-weight-normal);
+  line-height: 1.6;
+}
+
+.text-caption {
+  font-size: var(--fa-font-size-sm);
+  font-weight: var(--fa-font-weight-normal);
+  color: var(--fa-text-secondary);
+  line-height: 1.5;
+}
+
+.text-overline {
+  font-size: var(--fa-font-size-xs);
+  font-weight: var(--fa-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fa-text-muted);
+}
+
+/* ─── Semantic Text Colors ───────────────────────────────────────── */
+
+.text-positive { color: var(--fa-color-positive); }
+.text-warning  { color: var(--fa-color-warning); }
+.text-critical { color: var(--fa-color-critical); }
+.text-accent   { color: var(--fa-accent-primary); }
+.text-muted    { color: var(--fa-text-muted); }

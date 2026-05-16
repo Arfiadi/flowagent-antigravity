@@ -1,0 +1,24 @@
+# General
+.DS_Store
+.env
+.env.local
+*.log
+
+# Node (Frontend)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Python (Backend)
+backend/.venv/
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.pyd
+backend/.pytest_cache/
+backend/service_account.json
+
+# IDE
+.vscode/
+.idea/
+.gemini/
