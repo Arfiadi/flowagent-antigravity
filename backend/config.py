@@ -1,9 +1,13 @@
 """
 FlowAgent — Centralized Configuration
 
-Uses Pydantic Settings for validated, type-safe configuration.
+Uses validated, type-safe settings with singleton pattern.
 All environment variables are loaded and validated at startup.
-Singleton clients for GenAI and Firestore are created once and reused.
+
+Key design decisions:
+- Dual-model config: Flash (fast extraction) vs Pro (deep reasoning)
+- Singleton clients via @lru_cache for GenAI and Firestore
+- Fail-fast validation on startup
 """
 
 import logging
@@ -21,14 +25,20 @@ logger = logging.getLogger("flowagent")
 
 
 class Settings:
-    """Application settings loaded from environment variables."""
+    """Application settings loaded from environment variables.
+
+    Two Gemini models are configured per PRD §3:
+    - SENSE model (Flash): Optimized for speed and entity extraction
+    - THINK model (Pro): Optimized for long-context reasoning
+    """
 
     FIREBASE_PROJECT_ID: str = os.getenv("FIREBASE_PROJECT_ID", "")
     GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv(
         "GOOGLE_APPLICATION_CREDENTIALS", "service_account.json"
     )
     VERTEX_AI_LOCATION: str = os.getenv("VERTEX_AI_LOCATION", "us-central1")
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    GEMINI_SENSE_MODEL: str = os.getenv("GEMINI_SENSE_MODEL", "gemini-2.5-flash")
+    GEMINI_THINK_MODEL: str = os.getenv("GEMINI_THINK_MODEL", "gemini-2.5-pro")
 
     def validate(self) -> None:
         """Validate that all required settings are present."""

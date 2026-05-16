@@ -1,23 +1,30 @@
 """
 FlowAgent — Firestore Tool (STATE Layer)
 
-Handles all Firestore CRUD operations for:
-- business_state/{uid} (read/update)
-- transactions/{auto_id} (write)
-- agent_actions/{auto_id} (write)
+Handles all Firestore CRUD operations and state recalculation:
+- business_state/{uid} (read/update/recalculate)
+- transactions/{auto_id} (write/read history)
+- agent_actions/{auto_id} (write/read history)
 
-Reference: database_schema.md, implementation_plan.md §4.3
+The recalculation engine computes AiMetrics automatically after
+every transaction, using formulas from domain_specs.md §2.B:
+- health_score = Total Cash / Total Payables Due
+- risk_level derived from health_score thresholds
+- cash_runway_days = Total Cash / (Daily OpEx estimate)
+
+Reference: database_schema.md, domain_specs.md §2, PRD §4
 """
 
 import logging
 from datetime import datetime, timezone
 
-from google.cloud.firestore_v1 import SERVER_TIMESTAMP
-
 from config import get_firestore_client
 from models import BusinessState, TransactionPayload, AgentAction
 
 logger = logging.getLogger("flowagent.tools.firestore")
+
+
+# ─── READ Operations ────────────────────────────────────────────────
 
 
 def read_business_state(uid: str) -> BusinessState | None:
@@ -38,13 +45,74 @@ def read_business_state(uid: str) -> BusinessState | None:
         return None
 
     state = BusinessState(**doc.to_dict())
-    logger.info("Read business_state for uid=%s (health=%.2f)", uid, state.ai_metrics.health_score)
+    logger.info(
+        "Read business_state for uid=%s (health=%.2f, risk=%s)",
+        uid,
+        state.ai_metrics.health_score,
+        state.ai_metrics.liquidity_risk_level,
+    )
     return state
+
+
+def read_recent_transactions(uid: str, limit: int = 20) -> list[dict]:
+    """
+    Read the N most recent transactions for historical AI context.
+
+    Args:
+        uid: The user's ID.
+        limit: Maximum number of transactions to return.
+
+    Returns:
+        List of transaction dicts, newest first.
+    """
+    db = get_firestore_client()
+    docs = (
+        db.collection("transactions")
+        .where("uid", "==", uid)
+        .order_by("created_at", direction="DESCENDING")
+        .limit(limit)
+        .stream()
+    )
+    transactions = [doc.to_dict() for doc in docs]
+    logger.info("Read %d recent transactions for uid=%s", len(transactions), uid)
+    return transactions
+
+
+def read_recent_actions(uid: str, limit: int = 10) -> list[dict]:
+    """
+    Read the N most recent AI actions for anti-duplication context.
+
+    Args:
+        uid: The user's ID.
+        limit: Maximum number of actions to return.
+
+    Returns:
+        List of action dicts, newest first.
+    """
+    db = get_firestore_client()
+    docs = (
+        db.collection("agent_actions")
+        .where("uid", "==", uid)
+        .order_by("created_at", direction="DESCENDING")
+        .limit(limit)
+        .stream()
+    )
+    actions = [doc.to_dict() for doc in docs]
+    logger.info("Read %d recent actions for uid=%s", len(actions), uid)
+    return actions
+
+
+# ─── WRITE Operations ───────────────────────────────────────────────
 
 
 def write_transaction(uid: str, payload: TransactionPayload, modality: str = "photo") -> str:
     """
-    Write a new transaction to Firestore and update business_state accordingly.
+    Write a new transaction to Firestore and trigger state recalculation.
+
+    Flow:
+    1. Write raw transaction to 'transactions' collection.
+    2. Update business_state arrays (receivables/payables).
+    3. Recalculate all AiMetrics (health_score, risk, runway).
 
     Args:
         uid: The user's ID.
@@ -57,7 +125,7 @@ def write_transaction(uid: str, payload: TransactionPayload, modality: str = "ph
     db = get_firestore_client()
     now = datetime.now(timezone.utc).isoformat()
 
-    # Write to transactions collection
+    # Step 1: Write to transactions collection
     tx_data = {
         "type": payload.type,
         "amount": payload.amount,
@@ -69,10 +137,13 @@ def write_transaction(uid: str, payload: TransactionPayload, modality: str = "ph
         "uid": uid,
     }
     _, doc_ref = db.collection("transactions").add(tx_data)
-    logger.info("Transaction written: id=%s, type=%s, amount=%.0f", doc_ref.id, payload.type, payload.amount)
+    logger.info(
+        "Transaction written: id=%s, type=%s, amount=%.0f",
+        doc_ref.id, payload.type, payload.amount,
+    )
 
-    # Update business_state based on transaction type
-    _update_business_state(uid, payload)
+    # Step 2 + 3: Update state and recalculate metrics
+    _update_and_recalculate(uid, payload, now)
 
     return doc_ref.id
 
@@ -100,40 +171,182 @@ def write_action(uid: str, action: AgentAction) -> str:
     return doc_ref.id
 
 
-def _update_business_state(uid: str, payload: TransactionPayload) -> None:
+# ─── State Update & Recalculation Engine ────────────────────────────
+
+
+def _update_and_recalculate(uid: str, payload: TransactionPayload, now: str) -> None:
     """
-    Recalculate and update business_state after a new transaction.
-    This is where the THINK layer's real-time recalculation happens.
+    Read-Compute-Write pattern for business_state.
+
+    Unlike the previous increment-only approach, this reads the full
+    state, mutates it in-memory, recalculates all metrics, and writes
+    the complete updated state back to Firestore atomically.
     """
     db = get_firestore_client()
     state_ref = db.collection("business_state").document(uid)
-    now = datetime.now(timezone.utc).isoformat()
+    doc = state_ref.get()
 
-    updates: dict = {"liquid_assets.last_updated": now}
+    if not doc.exists:
+        logger.warning("Cannot update: no business_state for uid=%s", uid)
+        return
+
+    state = doc.to_dict()
+
+    # ── Step 2a: Update cash and array fields based on transaction type ──
 
     match payload.type:
         case "cash_in":
-            updates["liquid_assets.cash_on_hand"] = (
-                firestore_increment(payload.amount)
+            state["liquid_assets"]["cash_on_hand"] = (
+                state["liquid_assets"].get("cash_on_hand", 0) + payload.amount
             )
+            # Track gross revenue
+            state.setdefault("ai_metrics", {})
+            state["ai_metrics"]["gross_revenue"] = (
+                state["ai_metrics"].get("gross_revenue", 0) + payload.amount
+            )
+
         case "cash_out":
-            updates["liquid_assets.cash_on_hand"] = (
-                firestore_increment(-payload.amount)
+            state["liquid_assets"]["cash_on_hand"] = max(
+                0, state["liquid_assets"].get("cash_on_hand", 0) - payload.amount
             )
+
         case "receivable_created":
-            updates["trapped_capital.receivables_total"] = (
-                firestore_increment(payload.amount)
+            # Append to granular receivables array
+            new_item = {
+                "entity_name": payload.entity,
+                "amount": payload.amount,
+                "due_date": payload.due_date,
+                "created_at": now,
+            }
+            receivables = state.get("trapped_capital", {}).get("receivables", [])
+            receivables.append(new_item)
+            state["trapped_capital"]["receivables"] = receivables
+            state["trapped_capital"]["receivables_total"] = sum(
+                r["amount"] for r in receivables
             )
+
         case "payable_created":
-            updates["liabilities.payables_total"] = (
-                firestore_increment(payload.amount)
+            # Append to granular payables array
+            new_item = {
+                "entity_name": payload.entity,
+                "amount": payload.amount,
+                "due_date": payload.due_date,
+                "created_at": now,
+            }
+            payables = state.get("liabilities", {}).get("payables", [])
+            payables.append(new_item)
+            state["liabilities"]["payables"] = payables
+            state["liabilities"]["payables_total"] = sum(
+                p["amount"] for p in payables
             )
 
-    state_ref.update(updates)
-    logger.info("business_state updated for uid=%s after %s", uid, payload.type)
+    # ── Step 2b: Update timestamp ──
+    state["liquid_assets"]["last_updated"] = now
+
+    # ── Step 3: Recalculate ALL AI metrics ──
+    ai_updates = _recalculate_ai_metrics(state)
+    state.setdefault("ai_metrics", {}).update(ai_updates)
+
+    # Aging receivables
+    receivables = state.get("trapped_capital", {}).get("receivables", [])
+    state["trapped_capital"]["aging_receivables_metrics"] = _compute_aging_metrics(receivables)
+
+    # ── Write back atomically ──
+    state_ref.set(state)
+    logger.info(
+        "business_state recalculated for uid=%s: health=%.2f, risk=%s, runway=%d days",
+        uid,
+        ai_updates["health_score"],
+        ai_updates["liquidity_risk_level"],
+        ai_updates["cash_runway_days"],
+    )
 
 
-def firestore_increment(value: float):
-    """Helper to create a Firestore increment transform."""
-    from google.cloud.firestore_v1 import transforms
-    return transforms.Increment(value)
+def _recalculate_ai_metrics(state: dict) -> dict:
+    """
+    Compute all AI-driven metrics from raw state data.
+
+    Formulas from domain_specs.md §2.B:
+    - Health Score = Total Liquid Cash / Total Payables Due
+    - Risk: <1.0 = high, 1.0-1.5 = medium, >1.5 = low
+    - Runway = Total Cash / Daily OpEx estimate
+    """
+    la = state.get("liquid_assets", {})
+    tc = state.get("trapped_capital", {})
+    lb = state.get("liabilities", {})
+
+    total_cash = la.get("cash_on_hand", 0) + la.get("bank_balance", 0)
+    total_payables = lb.get("payables_total", 0) + lb.get("upcoming_opex", 0)
+
+    # Health Score (core liquidity indicator)
+    if total_payables > 0:
+        health_score = round(total_cash / total_payables, 2)
+    else:
+        health_score = 99.0  # No liabilities = perfectly healthy
+
+    # Risk Level (domain_specs.md §2.B thresholds)
+    if health_score < 1.0:
+        risk_level = "high"
+    elif health_score < 1.5:
+        risk_level = "medium"
+    else:
+        risk_level = "low"
+
+    # Cash Runway (days of survival at current burn rate)
+    daily_opex = lb.get("upcoming_opex", 1) / 30
+    if daily_opex > 0:
+        cash_runway = min(int(total_cash / daily_opex), 365)
+    else:
+        cash_runway = 365
+
+    # Net Margin = Revenue - (total cash out expenses proxy)
+    gross_revenue = state.get("ai_metrics", {}).get("gross_revenue", 0)
+    net_margin = gross_revenue - total_payables
+
+    # DSO = (receivables_total / gross_revenue) * 30 days
+    receivables_total = tc.get("receivables_total", 0)
+    if gross_revenue > 0:
+        dso = round((receivables_total / gross_revenue) * 30, 1)
+    else:
+        dso = 0
+
+    return {
+        "health_score": health_score,
+        "liquidity_risk_level": risk_level,
+        "cash_runway_days": cash_runway,
+        "gross_revenue": gross_revenue,
+        "net_margin": round(net_margin, 2),
+        "days_sales_outstanding_dso": dso,
+    }
+
+
+def _compute_aging_metrics(receivables: list[dict]) -> dict:
+    """
+    Bucket receivables by age since creation date.
+
+    Three buckets per PRD §4:
+    - below_15d: Fresh receivables (low risk)
+    - 15d_to_30d: Aging receivables (medium risk)
+    - above_30d: Stale receivables (high risk, needs collection)
+    """
+    now = datetime.now(timezone.utc)
+    buckets = {"below_15d": 0.0, "15d_to_30d": 0.0, "above_30d": 0.0}
+
+    for r in receivables:
+        created_str = r.get("created_at", "")
+        if not created_str:
+            continue
+        try:
+            created = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
+            age_days = (now - created).days
+            if age_days < 15:
+                buckets["below_15d"] += r.get("amount", 0)
+            elif age_days <= 30:
+                buckets["15d_to_30d"] += r.get("amount", 0)
+            else:
+                buckets["above_30d"] += r.get("amount", 0)
+        except (ValueError, TypeError):
+            logger.warning("Could not parse created_at: %s", created_str)
+            buckets["above_30d"] += r.get("amount", 0)
+
+    return buckets

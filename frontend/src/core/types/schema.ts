@@ -3,11 +3,17 @@
  *
  * These interfaces mirror the Firestore collections exactly.
  * Any changes MUST be synchronized with:
- *   - artifacts/data_contracts.md (Source of Truth)
+ *   - artifacts/database_schema.md (Source of Truth)
  *   - backend/models/state_models.py (Pydantic V2)
  *
  * All currency values are in IDR (Indonesian Rupiah) as floats.
  * All dates use ISO 8601 format strings.
+ *
+ * Changelog v0.5.0:
+ *   - Added ReceivableItem, PayableItem (granular per-entity objects)
+ *   - Added uncategorized_inflows to LiquidAssets
+ *   - Added aging_receivables_metrics to TrappedCapital
+ *   - Added gross_revenue, net_margin, days_sales_outstanding_dso to AiMetrics
  */
 
 // ─── Literal Union Types ────────────────────────────────────────────
@@ -31,21 +37,45 @@ export type ActionType =
 
 export type ActionStatus = "pending_review" | "approved" | "rejected";
 
+// ─── Granular Entity Objects (PRD §4) ───────────────────────────────
+
+export interface ReceivableItem {
+  entity_name: string;
+  amount: number;
+  due_date: string | null;
+  created_at: string;
+}
+
+export interface PayableItem {
+  entity_name: string;
+  amount: number;
+  due_date: string | null;
+  created_at: string;
+}
+
 // ─── Collection: business_state/{uid} ───────────────────────────────
 
 export interface LiquidAssets {
   cash_on_hand: number;
   bank_balance: number;
+  uncategorized_inflows: number;
   last_updated: string; // ISO 8601
 }
 
 export interface TrappedCapital {
+  receivables: ReceivableItem[];
   receivables_total: number;
+  aging_receivables_metrics: {
+    below_15d: number;
+    "15d_to_30d": number;
+    above_30d: number;
+  };
   inventory_estimate: number;
   dead_stock_value: number;
 }
 
 export interface Liabilities {
+  payables: PayableItem[];
   payables_total: number;
   upcoming_opex: number;
 }
@@ -54,6 +84,9 @@ export interface AiMetrics {
   cash_runway_days: number;
   liquidity_risk_level: RiskLevel;
   health_score: number;
+  gross_revenue: number;
+  net_margin: number;
+  days_sales_outstanding_dso: number;
 }
 
 export interface BusinessState {

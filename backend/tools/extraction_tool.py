@@ -56,7 +56,7 @@ async def extract_from_image(image_bytes: bytes, mime_type: str = "image/jpeg") 
     prompt = _load_sense_prompt()
 
     response = client.models.generate_content(
-        model=settings.GEMINI_MODEL,
+        model=settings.GEMINI_SENSE_MODEL,
         contents=[
             genai_types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
             prompt,

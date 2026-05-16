@@ -18,7 +18,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import get_settings
 from models import TransactionPayload, AgentAction
 from tools.extraction_tool import extract_from_image, extract_from_text
-from tools.firestore_tool import read_business_state, write_transaction, write_action
+from tools.firestore_tool import (
+    read_business_state,
+    read_recent_transactions,
+    read_recent_actions,
+    write_transaction,
+    write_action,
+)
 from tools.action_tool import generate_action_draft
 
 # ─── Logging Configuration ──────────────────────────────────────────
@@ -56,9 +62,10 @@ async def startup_event():
     try:
         settings = get_settings()
         logger.info(
-            "FlowAgent API starting (project=%s, model=%s)",
+            "FlowAgent API starting (project=%s, sense=%s, think=%s)",
             settings.FIREBASE_PROJECT_ID,
-            settings.GEMINI_MODEL,
+            settings.GEMINI_SENSE_MODEL,
+            settings.GEMINI_THINK_MODEL,
         )
     except Exception as exc:
         logger.error("Startup failed: %s", exc)
@@ -73,9 +80,10 @@ async def health_check():
     settings = get_settings()
     return {
         "status": "healthy",
-        "version": "0.4.0",
+        "version": "0.5.0",
         "project": settings.FIREBASE_PROJECT_ID,
-        "model": settings.GEMINI_MODEL,
+        "sense_model": settings.GEMINI_SENSE_MODEL,
+        "think_model": settings.GEMINI_THINK_MODEL,
     }
 
 
@@ -135,10 +143,11 @@ async def analyze_and_act(
     THINK + ACT Layer endpoint.
 
     Triggered after user approves a TransactionPayload:
-    1. Writes the transaction to Firestore.
+    1. Writes the transaction to Firestore (+ recalculates state).
     2. Reads updated business_state.
-    3. Generates an action draft if risk is detected.
-    4. Writes the action draft to Firestore.
+    3. Fetches historical context for AI memory.
+    4. Generates an action draft if risk is detected.
+    5. Writes the action draft to Firestore.
 
     The frontend ActionCenterFeed will pick up new actions via onSnapshot.
     """
@@ -150,11 +159,11 @@ async def analyze_and_act(
         data = json.loads(payload_json)
         payload = TransactionPayload(**data)
 
-        # Step 2: Write transaction to Firestore
+        # Step 2: Write transaction to Firestore (triggers recalculation)
         tx_id = write_transaction(uid, payload, modality)
         logger.info("Transaction persisted: tx_id=%s", tx_id)
 
-        # Step 3: Read updated business state
+        # Step 3: Read updated business state (with recalculated metrics)
         state = read_business_state(uid)
         if not state:
             return {
@@ -167,8 +176,20 @@ async def analyze_and_act(
         # Step 4: Generate action if health score warrants it
         action_id = None
         if state.ai_metrics.health_score < 1.5:
-            logger.info("Health score %.2f < 1.5, generating action draft...", state.ai_metrics.health_score)
-            action = await generate_action_draft(state)
+            logger.info(
+                "Health score %.2f < 1.5, generating action draft...",
+                state.ai_metrics.health_score,
+            )
+
+            # Fetch historical context for AI memory (anti-duplication)
+            recent_tx = read_recent_transactions(uid, limit=20)
+            recent_actions = read_recent_actions(uid, limit=10)
+
+            action = await generate_action_draft(
+                state=state,
+                recent_transactions=recent_tx,
+                recent_actions=recent_actions,
+            )
             action_id = write_action(uid, action)
 
         return {
@@ -177,6 +198,8 @@ async def analyze_and_act(
             "action_generated": action_id is not None,
             "action_id": action_id,
             "health_score": state.ai_metrics.health_score,
+            "risk_level": state.ai_metrics.liquidity_risk_level,
+            "cash_runway_days": state.ai_metrics.cash_runway_days,
         }
 
     except ValueError as exc:

@@ -1,8 +1,10 @@
 /**
  * PulseDashboard — Main liquidity dashboard layout
  *
- * Source of truth: ui_ux_design.md §3.A
+ * Source of truth: ui_ux_design.md §3.A, PRD §4
  * Composes HealthScoreRing + CashFlowCards into the home screen.
+ *
+ * v0.5.0: Added Omzet, Laba Bersih, Dead Stock, and DSO cards.
  */
 
 import type { BusinessState } from "../../../core/types/schema";
@@ -36,7 +38,7 @@ export function PulseDashboard({ state }: PulseDashboardProps) {
         </div>
       </div>
 
-      {/* ── Cards Grid ───────────────────────────────────────────── */}
+      {/* ── Primary Metrics Grid ──────────────────────────────────── */}
       <div className="pulse-dashboard__grid stagger-children">
         <CashFlowCard
           label="Kas Likuid"
@@ -52,6 +54,25 @@ export function PulseDashboard({ state }: PulseDashboardProps) {
           label="Hutang Supplier"
           value={liabilities.payables_total}
           color="critical"
+        />
+      </div>
+
+      {/* ── Extended Metrics Grid (PRD §4) ────────────────────────── */}
+      <div className="pulse-dashboard__grid stagger-children">
+        <CashFlowCard
+          label="Omzet Berjalan"
+          value={ai_metrics.gross_revenue}
+          color="positive"
+        />
+        <CashFlowCard
+          label="Laba Bersih"
+          value={ai_metrics.net_margin}
+          color={ai_metrics.net_margin >= 0 ? "positive" : "critical"}
+        />
+        <CashFlowCard
+          label="Dead Stock"
+          value={trapped_capital.dead_stock_value}
+          color="warning"
         />
       </div>
     </section>
