@@ -70,7 +70,7 @@ export function HealthScoreRing({ score }: HealthScoreRingProps) {
           <span className="health-gauge__value">{normalizedScore.toFixed(2)}</span>
           <span className="health-gauge__scale">/ 5.00</span>
         </div>
-        <span className="health-gauge__caption">HEALTH SCORE</span>
+        <span className="health-gauge__caption">SKOR KESEHATAN</span>
         <span className="health-gauge__insight">▼ Turun 0.5 poin dari minggu lalu</span>
       </div>
     </div>

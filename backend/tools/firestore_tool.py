@@ -18,8 +18,12 @@ Reference: database_schema.md, domain_specs.md §2, PRD §4
 import logging
 from datetime import datetime, timezone
 
+from firebase_admin import firestore
 from config import get_firestore_client
-from models import BusinessState, TransactionPayload, AgentAction
+from models import (
+    BusinessState, TransactionPayload, AgentAction,
+    LiquidAssets, TrappedCapital, Liabilities, AiMetrics
+)
 
 logger = logging.getLogger("flowagent.tools.firestore")
 
@@ -105,6 +109,66 @@ def read_recent_actions(uid: str, limit: int = 10) -> list[dict]:
 # ─── WRITE Operations ───────────────────────────────────────────────
 
 
+def set_initial_state(uid: str, cash: int, bank: int, inventory: int, receivables: int = 0) -> dict:
+    """
+    Sets the initial financial position for a new user.
+    Strictly follows the 4-map schema via Pydantic Data Contracts.
+    """
+    db = get_firestore_client()
+    state_ref = db.collection("business_state").document(uid)
+
+    @firestore.transactional
+    def _do_set(transaction):
+        now = datetime.now(timezone.utc).isoformat()
+        
+        # 1. Instantiate strict Pydantic model (handles defaults & types)
+        state_model = BusinessState(
+            liquid_assets=LiquidAssets(
+                cash_on_hand=cash,
+                bank_balance=bank,
+                last_updated=now
+            ),
+            trapped_capital=TrappedCapital(
+                receivables=[],
+                receivables_total=receivables,
+                inventory_estimate=inventory,
+                dead_stock_value=0,
+                aging_receivables_metrics={
+                    "below_15d": receivables, # Initial assumption
+                    "15d_to_30d": 0,
+                    "above_30d": 0
+                }
+            ),
+            liabilities=Liabilities(
+                payables=[],
+                payables_total=0,
+                upcoming_opex=0
+            ),
+            ai_metrics=AiMetrics(
+                cash_runway_days=0,
+                liquidity_risk_level="low",
+                health_score=0,
+                gross_revenue=0,
+                net_margin=0,
+                days_sales_outstanding_dso=0
+            )
+        )
+        
+        # Convert to raw dict for the recalculation engine
+        initial_dict = state_model.model_dump()
+        
+        # 2. Recalculate metrics based on new balances
+        ai_updates = _recalculate_ai_metrics(initial_dict)
+        initial_dict["ai_metrics"].update(ai_updates)
+        
+        # 3. Write back atomically using the validated nested dictionary
+        transaction.set(state_ref, initial_dict)
+        return initial_dict
+
+    transaction = db.transaction()
+    return _do_set(transaction)
+
+
 def write_transaction(uid: str, payload: TransactionPayload, modality: str = "photo") -> str:
     """
     Write a new transaction to Firestore and trigger state recalculation.
@@ -129,7 +193,7 @@ def write_transaction(uid: str, payload: TransactionPayload, modality: str = "ph
     tx_data = {
         "type": payload.type,
         "amount": payload.amount,
-        "entity_name": payload.entity,
+        "entity_name": payload.entity_name,
         "category": payload.category,
         "due_date": payload.due_date,
         "source_modality": modality,
@@ -177,100 +241,144 @@ def write_action(uid: str, action: AgentAction) -> str:
 
 def _update_and_recalculate(uid: str, payload: TransactionPayload, now: str) -> None:
     """
-    Read-Compute-Write pattern for business_state.
-
-    Unlike the previous increment-only approach, this reads the full
-    state, mutates it in-memory, recalculates all metrics, and writes
-    the complete updated state back to Firestore atomically.
+    Read-Compute-Write pattern for business_state using Firestore Transactions.
     """
     db = get_firestore_client()
     state_ref = db.collection("business_state").document(uid)
-    doc = state_ref.get()
+    transaction = db.transaction()
 
-    if not doc.exists:
-        logger.warning("Cannot update: no business_state for uid=%s", uid)
-        return
+    @firestore.transactional
+    def _atomic_update(transaction, state_ref, payload, now):
+        doc = state_ref.get(transaction=transaction)
+        if not doc.exists:
+            logger.warning("Cannot update: no business_state for uid=%s", uid)
+            return None
 
-    state = doc.to_dict()
+        state = doc.to_dict()
 
-    # ── Step 2a: Update cash and array fields based on transaction type ──
-
-    match payload.type:
-        case "cash_in":
-            state["liquid_assets"]["cash_on_hand"] = (
-                state["liquid_assets"].get("cash_on_hand", 0) + payload.amount
-            )
-            # Track gross revenue
-            state.setdefault("ai_metrics", {})
-            state["ai_metrics"]["gross_revenue"] = (
-                state["ai_metrics"].get("gross_revenue", 0) + payload.amount
-            )
-
-        case "cash_out":
-            state["liquid_assets"]["cash_on_hand"] = max(
-                0, state["liquid_assets"].get("cash_on_hand", 0) - payload.amount
-            )
-            # Update specialized buckets based on category
-            if payload.category.lower() == "stok":
-                state["trapped_capital"]["inventory_estimate"] = (
-                    state["trapped_capital"].get("inventory_estimate", 0) + payload.amount
+        # ── Step 2a: Update cash and array fields based on transaction type ──
+        match payload.type:
+            case "cash_in":
+                state["liquid_assets"]["cash_on_hand"] = (
+                    state["liquid_assets"].get("cash_on_hand", 0) + payload.amount
                 )
-            elif payload.category.lower() in ["operasional", "gaji"]:
-                # If it's a cash out for opex, it reduces the *upcoming* opex burden
-                state["liabilities"]["upcoming_opex"] = max(
-                    0, state["liabilities"].get("upcoming_opex", 0) - payload.amount
+                state.setdefault("ai_metrics", {})
+                state["ai_metrics"]["gross_revenue"] = (
+                    state["ai_metrics"].get("gross_revenue", 0) + payload.amount
                 )
 
-        case "receivable_created":
-            # Append to granular receivables array
-            new_item = {
-                "entity_name": payload.entity,
-                "amount": payload.amount,
-                "due_date": payload.due_date,
-                "created_at": now,
-            }
-            receivables = state.get("trapped_capital", {}).get("receivables", [])
-            receivables.append(new_item)
-            state["trapped_capital"]["receivables"] = receivables
-            state["trapped_capital"]["receivables_total"] = sum(
-                r["amount"] for r in receivables
+            case "cash_out":
+                state["liquid_assets"]["cash_on_hand"] = max(
+                    0, state["liquid_assets"].get("cash_on_hand", 0) - payload.amount
+                )
+                if payload.category.lower() == "stok":
+                    state["trapped_capital"]["inventory_estimate"] = (
+                        state["trapped_capital"].get("inventory_estimate", 0) + payload.amount
+                    )
+                elif payload.category.lower() in ["operasional", "gaji"]:
+                    state["liabilities"]["upcoming_opex"] = max(
+                        0, state["liabilities"].get("upcoming_opex", 0) - payload.amount
+                    )
+
+            case "receivable_created":
+                new_item = {
+                    "entity_name": payload.entity_name,
+                    "amount": payload.amount,
+                    "due_date": payload.due_date,
+                    "created_at": now,
+                }
+                receivables = state.get("trapped_capital", {}).get("receivables", [])
+                receivables.append(new_item)
+                state["trapped_capital"]["receivables"] = receivables
+                state["trapped_capital"]["receivables_total"] = sum(r["amount"] for r in receivables)
+
+            case "receivable_paid":
+                state["liquid_assets"]["cash_on_hand"] = (
+                    state["liquid_assets"].get("cash_on_hand", 0) + payload.amount
+                )
+                state.setdefault("ai_metrics", {})
+                state["ai_metrics"]["gross_revenue"] = (
+                    state["ai_metrics"].get("gross_revenue", 0) + payload.amount
+                )
+                receivables = state.get("trapped_capital", {}).get("receivables", [])
+                remaining_receivables = []
+                amount_to_clear = payload.amount
+                for r in receivables:
+                    if r["entity_name"].lower() == payload.entity_name.lower() and amount_to_clear > 0:
+                        if r["amount"] <= amount_to_clear:
+                            amount_to_clear -= r["amount"]
+                            continue
+                        else:
+                            r["amount"] -= amount_to_clear
+                            amount_to_clear = 0
+                            remaining_receivables.append(r)
+                    else:
+                        remaining_receivables.append(r)
+                state["trapped_capital"]["receivables"] = remaining_receivables
+                state["trapped_capital"]["receivables_total"] = sum(r["amount"] for r in remaining_receivables)
+
+            case "payable_created":
+                new_item = {
+                    "entity_name": payload.entity_name,
+                    "amount": payload.amount,
+                    "due_date": payload.due_date,
+                    "created_at": now,
+                }
+                payables = state.get("liabilities", {}).get("payables", [])
+                payables.append(new_item)
+                state["liabilities"]["payables"] = payables
+                state["liabilities"]["payables_total"] = sum(p["amount"] for p in payables)
+
+            case "payable_paid":
+                state["liquid_assets"]["cash_on_hand"] = max(
+                    0, state["liquid_assets"].get("cash_on_hand", 0) - payload.amount
+                )
+                payables = state.get("liabilities", {}).get("payables", [])
+                remaining_payables = []
+                amount_to_clear = payload.amount
+                for p in payables:
+                    if p["entity_name"].lower() == payload.entity_name.lower() and amount_to_clear > 0:
+                        if p["amount"] <= amount_to_clear:
+                            amount_to_clear -= p["amount"]
+                            continue
+                        else:
+                            p["amount"] -= amount_to_clear
+                            amount_to_clear = 0
+                            remaining_payables.append(p)
+                    else:
+                        remaining_payables.append(p)
+                state["liabilities"]["payables"] = remaining_payables
+                state["liabilities"]["payables_total"] = sum(p["amount"] for p in remaining_payables)
+
+        # ── Step 2b: Update timestamp ──
+        state["liquid_assets"]["last_updated"] = now
+
+        # ── Step 3: Recalculate ALL AI metrics ──
+        ai_updates = _recalculate_ai_metrics(state)
+        state.setdefault("ai_metrics", {}).update(ai_updates)
+
+        # Aging receivables
+        receivables = state.get("trapped_capital", {}).get("receivables", [])
+        state["trapped_capital"]["aging_receivables_metrics"] = _compute_aging_metrics(receivables)
+
+        # ── Write back atomically ──
+        transaction.set(state_ref, state)
+        return ai_updates
+
+    try:
+        ai_updates = _atomic_update(transaction, state_ref, payload, now)
+        if ai_updates:
+            logger.info(
+                "business_state transaction complete for uid=%s: health=%.2f, risk=%s, runway=%d days",
+                uid,
+                ai_updates["health_score"],
+                ai_updates["liquidity_risk_level"],
+                ai_updates["cash_runway_days"],
             )
+    except Exception as exc:
+        logger.error("Transaction failed for uid=%s: %s", uid, exc)
+        raise
 
-        case "payable_created":
-            # Append to granular payables array
-            new_item = {
-                "entity_name": payload.entity,
-                "amount": payload.amount,
-                "due_date": payload.due_date,
-                "created_at": now,
-            }
-            payables = state.get("liabilities", {}).get("payables", [])
-            payables.append(new_item)
-            state["liabilities"]["payables"] = payables
-            state["liabilities"]["payables_total"] = sum(
-                p["amount"] for p in payables
-            )
-
-    # ── Step 2b: Update timestamp ──
-    state["liquid_assets"]["last_updated"] = now
-
-    # ── Step 3: Recalculate ALL AI metrics ──
-    ai_updates = _recalculate_ai_metrics(state)
-    state.setdefault("ai_metrics", {}).update(ai_updates)
-
-    # Aging receivables
-    receivables = state.get("trapped_capital", {}).get("receivables", [])
-    state["trapped_capital"]["aging_receivables_metrics"] = _compute_aging_metrics(receivables)
-
-    # ── Write back atomically ──
-    state_ref.set(state)
-    logger.info(
-        "business_state recalculated for uid=%s: health=%.2f, risk=%s, runway=%d days",
-        uid,
-        ai_updates["health_score"],
-        ai_updates["liquidity_risk_level"],
-        ai_updates["cash_runway_days"],
-    )
 
 
 def _recalculate_ai_metrics(state: dict) -> dict:
@@ -303,7 +411,7 @@ def _recalculate_ai_metrics(state: dict) -> dict:
     else:
         risk_level = "low"
 
-    # Cash Runway (days of survival at current burn rate)
+    # Ketahanan Kas (days of survival at current burn rate)
     daily_opex = lb.get("upcoming_opex", 1) / 30
     if daily_opex > 0:
         cash_runway = min(int(total_cash / daily_opex), 365)

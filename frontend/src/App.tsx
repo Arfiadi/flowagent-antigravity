@@ -11,7 +11,7 @@ import { ShimmerLoader } from "./core/ui";
 import "./App.css";
 
 function App() {
-  const { state, loading, error } = useBusinessState("demo-user");
+  const { state, loading, error } = useBusinessState("test-user-v050");
 
   if (error) {
     return (

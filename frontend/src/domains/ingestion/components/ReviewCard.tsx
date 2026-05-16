@@ -23,23 +23,29 @@ interface ReviewCardProps {
   onApprove: (payload: TransactionPayload) => void;
   /** Optional captured image (base64) for preview */
   capturedImage?: string | null;
+  /** Called when user discards the extraction result */
+  onCancel?: () => void;
 }
 
 const TYPE_LABELS: Record<TransactionPayload["type"], string> = {
   cash_in: "PEMASUKAN",
   cash_out: "PENGELUARAN (STOK)",
   receivable_created: "PIUTANG BARU (KASBON)",
+  receivable_paid: "PELUNASAN PIUTANG",
   payable_created: "HUTANG BARU",
+  payable_paid: "PEMBAYARAN HUTANG",
 };
 
 const TYPE_ICONS: Record<TransactionPayload["type"], string> = {
   cash_in: "💰",
   cash_out: "📦",
   receivable_created: "📝",
+  receivable_paid: "✅",
   payable_created: "🏦",
+  payable_paid: "💸",
 };
 
-export function ReviewCard({ payload: initialPayload, onApprove, capturedImage }: ReviewCardProps) {
+export function ReviewCard({ payload: initialPayload, onApprove, capturedImage, onCancel }: ReviewCardProps) {
   const [edited, setEdited] = useState(initialPayload);
   const [notes, setNotes] = useState("");
 
@@ -81,12 +87,23 @@ export function ReviewCard({ payload: initialPayload, onApprove, capturedImage }
           <span className="review-card__header-title text-overline">
             DRAF TRANSAKSI AI (Dapat Diedit)
           </span>
-          <div className="review-card__confidence">
-            <span className="text-overline" style={{ fontSize: "0.6rem" }}>
-              AI: {Math.round(initialPayload.confidence_score * 100)}%
-            </span>
-            {isLowConfidence && (
-              <span className="review-card__warning-badge">⚠ Verifikasi</span>
+          <div className="review-card__actions">
+            <div className="review-card__confidence">
+              <span className="text-overline" style={{ fontSize: "0.6rem" }}>
+                AI: {Math.round(initialPayload.confidence_score * 100)}%
+              </span>
+              {isLowConfidence && (
+                <span className="review-card__warning-badge">⚠ Verifikasi</span>
+              )}
+            </div>
+            {onCancel && (
+              <button
+                className="review-card__cancel-btn"
+                onClick={onCancel}
+                title="Batalkan Ekstraksi"
+              >
+                ✕
+              </button>
             )}
           </div>
         </div>
@@ -115,8 +132,8 @@ export function ReviewCard({ payload: initialPayload, onApprove, capturedImage }
               <input
                 type="text"
                 className="review-card__field-input"
-                value={edited.entity}
-                onChange={(e) => setEdited({ ...edited, entity: e.target.value })}
+                value={edited.entity_name}
+                onChange={(e) => setEdited({ ...edited, entity_name: e.target.value })}
               />
             </div>
           </div>
@@ -183,7 +200,7 @@ export function ReviewCard({ payload: initialPayload, onApprove, capturedImage }
 
         {/* Full-width CTA */}
         <button className="review-card__approve-btn" onClick={handleApprove}>
-          📡 SETUJUI & SINKRON KE FIRESTORE
+          📡 SETUJU DAN SIMPAN
         </button>
       </GlassCard>
     </div>

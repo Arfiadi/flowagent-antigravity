@@ -10,7 +10,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../../core/config/firebase";
 import type { BusinessState } from "../../../core/types/schema";
 
-export function useBusinessState(uid: string = "demo-user") {
+export function useBusinessState(uid: string = "test-user-v050") {
   const [state, setState] = useState<BusinessState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);

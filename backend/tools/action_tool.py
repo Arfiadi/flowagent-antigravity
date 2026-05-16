@@ -72,6 +72,13 @@ async def generate_action_draft(
     tx_context = json.dumps(recent_transactions or [], indent=2, default=str)
     action_history = json.dumps(recent_actions or [], indent=2, default=str)
 
+    # Disable automatic function calling for manual interception of drafts
+    config = genai_types.GenerateContentConfig(
+        tools=[create_action_draft],
+        temperature=0.2,
+        automatic_function_calling=genai_types.AutomaticFunctionCallingConfig(disable=True)
+    )
+
     full_prompt = (
         f"{base_prompt}\n\n"
         f"═══ STATE KEUANGAN SAAT INI ═══\n{state_context}\n\n"
@@ -99,14 +106,11 @@ async def generate_action_draft(
             response = client.models.generate_content(
                 model=settings.GEMINI_THINK_MODEL,
                 contents=final_prompt,
-                config=genai_types.GenerateContentConfig(
-                    tools=[create_action_draft],
-                    temperature=0.2,
-                ),
+                config=config,
             )
 
             # Check for tool calls
-            tool_calls = response.tool_calls
+            tool_calls = response.function_calls
             if not tool_calls:
                 logger.info("Agent decided NO ACTION is needed for the current state.")
                 return None

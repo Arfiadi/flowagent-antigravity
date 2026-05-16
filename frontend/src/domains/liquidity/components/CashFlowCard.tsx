@@ -4,7 +4,7 @@
  * Source of truth: ui_ux_design.md §3.A, implementation_plan.md
  */
 
-import { useEffect, useState, ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { GlassCard } from "../../../core/ui";
 import "./CashFlowCard.css";
 

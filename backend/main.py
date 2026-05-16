@@ -15,7 +15,7 @@ import sys
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from config import get_settings
+from config import get_settings, get_firestore_client, get_genai_client
 from models import TransactionPayload, AgentAction
 from tools.extraction_tool import extract_from_image, extract_from_text, extract_from_audio
 from tools.firestore_tool import (
@@ -24,6 +24,7 @@ from tools.firestore_tool import (
     read_recent_actions,
     write_transaction,
     write_action,
+    set_initial_state,
 )
 from tools.action_tool import generate_action_draft
 
@@ -52,6 +53,8 @@ app.add_middleware(
         "http://localhost:5174",
         "http://localhost:5175",
         "http://localhost:3000",
+        "https://gen-lang-client-0964227719.web.app",
+        "https://gen-lang-client-0964227719.firebaseapp.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -72,12 +75,36 @@ async def startup_event():
             settings.GEMINI_SENSE_MODEL,
             settings.GEMINI_THINK_MODEL,
         )
+        
+        # Verify Firestore Connectivity
+        db = get_firestore_client()
+        # Simple read to verify access
+        db.collection("business_state").limit(1).get()
+        logger.info("Firestore connectivity verified.")
+        
+        # Verify GenAI Client (Vertex AI mode)
+        get_genai_client()
+        logger.info("GenAI client initialized successfully.")
+        
     except Exception as exc:
         logger.error("Startup failed: %s", exc)
         raise
 
 
 # ─── Endpoints ───────────────────────────────────────────────────────
+
+@app.get("/")
+async def root():
+    """Root endpoint with a welcoming message."""
+    settings = get_settings()
+    return {
+        "message": "Welcome to FlowAgent API 🧠",
+        "status": "online",
+        "docs_url": "/docs",
+        "health_check": "/api/health",
+        "project": settings.FIREBASE_PROJECT_ID
+    }
+
 
 @app.get("/api/health")
 async def health_check():
@@ -94,7 +121,7 @@ async def health_check():
 
 @app.post("/api/extract", response_model=TransactionPayload)
 async def extract_transaction(
-    uid: str = Form("demo-user"),
+    uid: str = Form("test-user-v050"),
     modality: str = Form("photo"),
     file: UploadFile | None = File(None),
     text: str | None = Form(None),
@@ -146,7 +173,7 @@ async def extract_transaction(
 
 @app.post("/api/analyze")
 async def analyze_and_act(
-    uid: str = Form("demo-user"),
+    uid: str = Form("test-user-v050"),
     payload_json: str = Form(...),
     modality: str = Form("photo"),
 ):
@@ -220,6 +247,39 @@ async def analyze_and_act(
     except Exception as exc:
         logger.error("Analysis error: %s", exc, exc_info=True)
         raise HTTPException(status_code=500, detail="Analysis pipeline failed")
+
+
+@app.post("/api/initial-setup")
+async def initial_setup(
+    uid: str = Form("test-user-v050"),
+    cash: int = Form(...),
+    bank: int = Form(...),
+    inventory: int = Form(...),
+    receivables: int = Form(0),
+):
+    """
+    Onboarding endpoint to set initial balances.
+    """
+    logger.info("Initial setup request for uid=%s", uid)
+    try:
+        updated_state = set_initial_state(uid, cash, bank, inventory, receivables)
+        return updated_state
+    except Exception as exc:
+        logger.error("Initial setup error: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to set initial state")
+
+@app.post("/api/reset")
+async def reset_data(uid: str = Form("test-user-v050")):
+    """
+    Danger zone endpoint: Wipes all user data and resets state to zero.
+    """
+    try:
+        from scripts.reset_db import reset_database
+        reset_database(uid)
+        return {"status": "success", "message": f"Data for {uid} has been reset."}
+    except Exception as exc:
+        logger.error("Reset error: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to reset data")
 
 
 # ─── Direct Run ──────────────────────────────────────────────────────

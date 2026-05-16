@@ -29,7 +29,7 @@ def _load_sense_prompt() -> str:
     logger.warning("sense_prompt.txt not found, using default prompt.")
     return (
         "Ekstrak data transaksi keuangan dari input berikut. "
-        "Output harus berupa JSON dengan field: type, amount, entity, due_date, confidence_score. "
+        "Output harus berupa JSON dengan field: type, amount, entity_name, due_date, confidence_score. "
         "type harus salah satu dari: cash_in, cash_out, receivable_created, payable_created. "
         "amount dalam Rupiah (angka saja). "
         "due_date dalam format ISO 8601 atau null. "
@@ -131,14 +131,22 @@ async def extract_from_audio(audio_bytes: bytes, mime_type: str = "audio/mp3") -
 
 def _parse_response(raw_json: str) -> TransactionPayload:
     """Parse and validate Gemini's JSON output into a TransactionPayload."""
+    # Clean up markdown backticks if present
+    clean_json = raw_json.strip()
+    if clean_json.startswith("```json"):
+        clean_json = clean_json[7:]
+    if clean_json.endswith("```"):
+        clean_json = clean_json[:-3]
+    clean_json = clean_json.strip()
+
     try:
-        data = json.loads(raw_json)
+        data = json.loads(clean_json)
         payload = TransactionPayload(**data)
         logger.info(
-            "Parsed payload: type=%s, amount=%.0f, entity=%s, confidence=%.2f",
-            payload.type, payload.amount, payload.entity, payload.confidence_score,
+            "Parsed payload: type=%s, amount=%.0f, entity_name=%s, confidence=%.2f",
+            payload.type, payload.amount, payload.entity_name, payload.confidence_score,
         )
         return payload
     except (json.JSONDecodeError, Exception) as exc:
-        logger.error("Failed to parse Gemini response: %s", raw_json[:200])
+        logger.error("Failed to parse Gemini response: %s", clean_json[:500])
         raise ValueError(f"Invalid extraction output from Gemini: {exc}") from exc

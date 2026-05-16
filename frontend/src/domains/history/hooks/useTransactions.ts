@@ -11,7 +11,7 @@ import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../../../core/config/firebase";
 import type { Transaction } from "../../../core/types/schema";
 
-export function useTransactions(uid: string = "demo-user") {
+export function useTransactions(uid: string = "test-user-v050") {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);

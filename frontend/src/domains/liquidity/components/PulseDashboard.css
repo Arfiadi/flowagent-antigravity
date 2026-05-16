@@ -63,12 +63,59 @@
   transform: translateX(2px);
 }
 
+/* ── Onboarding Banner 🚀 ────────────────────────────────────── */
+
+.onboarding-banner {
+  display: flex;
+  gap: var(--fa-space-md);
+  padding: var(--fa-space-md);
+  background: linear-gradient(135deg, rgba(0, 216, 255, 0.15), rgba(0, 216, 255, 0.05));
+  border: 1px solid rgba(0, 216, 255, 0.3);
+  border-radius: var(--fa-radius-lg);
+  box-shadow: 0 0 20px rgba(0, 216, 255, 0.1);
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.onboarding-banner:hover {
+  background: rgba(0, 216, 255, 0.1);
+  transform: translateY(-2px);
+  border-color: rgba(0, 216, 255, 0.5);
+}
+
+.onboarding-banner__icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 0 8px rgba(0, 216, 255, 0.5));
+}
+
+.onboarding-banner__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.onboarding-banner__title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #00D8FF;
+}
+
+.onboarding-banner__desc {
+  font-size: 0.7rem;
+  color: var(--fa-text-secondary);
+}
+
 /* ── Grid ───────────────────────────────────────────────────── */
 
 .pulse-dashboard__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--fa-space-md);
+}
+
+.pulse-dashboard__grid > * {
+  min-width: 0; /* Force grid items to respect 1fr and not expand */
 }
 
 /* ── Pulsing Effect for Critical Cards ──────────────────────── */

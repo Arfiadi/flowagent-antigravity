@@ -78,10 +78,37 @@
   letter-spacing: 0.5px;
 }
 
+.review-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--fa-space-sm);
+}
+
 .review-card__confidence {
   display: flex;
   align-items: center;
   gap: var(--fa-space-xs);
+}
+
+.review-card__cancel-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--fa-text-muted);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.7rem;
+}
+
+.review-card__cancel-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ff4d4d;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .review-card__warning-badge {

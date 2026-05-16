@@ -10,6 +10,11 @@ import os
 # Add parent dir to path so we can import from backend
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import logging
+# Configure logging to show INFO level
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
+
 from models import BusinessState, TransactionPayload, AgentAction, LiquidAssets, TrappedCapital, Liabilities, AiMetrics
 from tools.firestore_tool import _update_and_recalculate, read_business_state, write_action, read_recent_transactions, read_recent_actions
 from tools.action_tool import generate_action_draft
@@ -47,13 +52,13 @@ async def run_tests():
     payload = TransactionPayload(
         type="receivable_created",
         amount=2500000,
-        entity="Toko Makmur",
+        entity_name="Toko Makmur",
         due_date="2026-05-30",
         confidence_score=0.95
     )
     
-    now = datetime.now(timezone.utc).isoformat()
-    _update_and_recalculate(uid, payload, now)
+    from tools.firestore_tool import write_transaction
+    write_transaction(uid, payload, modality="text")
     
     state = read_business_state(uid)
     print(f"Health Score Baru: {state.ai_metrics.health_score} (Diharapkan: 15jt kas / 3jt opex = 5.0)")
@@ -65,15 +70,21 @@ async def run_tests():
     else:
         print("[FAILED] Objek granular piutang tidak tersimpan.")
         
-    # --- FASE 3: Validasi Agentic Context (Anti-Duplikasi) ---
+    # --- FASE 3: Menguji AI Context & Anti-Duplikasi ---
     print("\n--- FASE 3: Menguji AI Context & Anti-Duplikasi ---")
+    
     print("Memicu AI Draft (Percobaan 1 - Memori Kosong)...")
     
-    recent_tx = []
-    recent_actions = []
+    # Ambil konteks nyata dari Firestore agar AI tahu ada transaksi terbaru
+    recent_tx = read_recent_transactions(uid, limit=5)
+    recent_actions = read_recent_actions(uid, limit=5)
     
     action1 = await generate_action_draft(state, recent_tx, recent_actions)
-    print(f"Aksi 1 Terbuat: [{action1.action_type}] Target: {action1.target_entity}")
+    if not action1:
+        print("[INFO] AI memutuskan tidak bertindak (cek GEMINI_API_KEY atau Prompt).")
+        return
+
+    print(f"[OK] Aksi 1 Terbuat: [{action1.action_type}] Target: {action1.target_entity}")
     print(f"Pesan: {action1.message_body[:50]}...")
     
     # Simpan aksi pertama ke memori (Firestore)

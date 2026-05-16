@@ -39,7 +39,9 @@ ExtractionTransactionType = Literal[
     "cash_in",
     "cash_out",
     "receivable_created",
+    "receivable_paid",
     "payable_created",
+    "payable_paid",
 ]
 
 SourceModality = Literal["voice", "photo", "text", "manual"]
@@ -209,7 +211,7 @@ class TransactionPayload(BaseModel):
 
     type: ExtractionTransactionType
     amount: float = Field(gt=0, description="Extracted amount in IDR")
-    entity: str = Field(min_length=1, description="Extracted entity name")
+    entity_name: str = Field(min_length=1, description="Extracted entity name")
     category: str = Field(default="Lainnya", description="Kategori transaksi (e.g., Stok, Operasional, Gaji)")
     due_date: Optional[str] = Field(default=None, description="ISO 8601 date or null")
     confidence_score: float = Field(ge=0, le=1, description="Model confidence")

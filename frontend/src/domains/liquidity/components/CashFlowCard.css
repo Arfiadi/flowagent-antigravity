@@ -54,9 +54,14 @@
 }
 
 .cashflow-card__value {
-  font-size: 1.25rem;
+  font-size: clamp(0.85rem, 4.5vw, 1.25rem);
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
 }
 
 .cashflow-card__value--positive { color: #00D8FF; }

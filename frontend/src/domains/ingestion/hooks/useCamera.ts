@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 export function useCamera() {
   const [error, setError] = useState<string | null>(null);
@@ -6,23 +6,39 @@ export function useCamera() {
   const streamRef = useRef<MediaStream | null>(null);
 
   const stopCamera = useCallback(() => {
+    // Aggressive cleanup
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
+      const tracks = streamRef.current.getTracks();
+      tracks.forEach((track) => {
+        track.stop();
+        track.enabled = false;
+      });
       streamRef.current = null;
     }
+    
     if (videoRef.current) {
       videoRef.current.srcObject = null;
+      videoRef.current.load(); // Force release
     }
   }, []);
+
+  // Auto-cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, [stopCamera]);
 
   const startCamera = useCallback(async () => {
     try {
       setError(null);
-      // Stop any existing stream first
+      // Ensure previous is stopped
       stopCamera();
+
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
       });
+      
       streamRef.current = mediaStream;
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
@@ -34,7 +50,7 @@ export function useCamera() {
   }, [stopCamera]);
 
   const capturePhoto = useCallback((): string | null => {
-    if (!videoRef.current) return null;
+    if (!videoRef.current || !streamRef.current) return null;
 
     const canvas = document.createElement("canvas");
     canvas.width = videoRef.current.videoWidth;

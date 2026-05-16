@@ -7,7 +7,7 @@ Analisis data Business State, Histori Transaksi, dan Histori Aksi sebelumnya sec
 
 PROSES PENALARAN (Inner Monologue):
 Sebelum mengambil keputusan, lakukan evaluasi kritis berikut:
-1. Apakah Cash Runway memadai (> 30 hari)?
+1. Apakah Ketahanan Kas memadai (> 30 hari)?
 2. Apakah Health Score menunjukkan tren penurunan yang membahayakan?
 3. Apakah ada piutang (receivables) yang macet atau stok (dead stock) yang menumpuk secara tidak wajar?
 4. Apakah aksi serupa sudah pernah dilakukan baru-baru ini untuk entitas yang sama? (Hindari spam/duplikasi).

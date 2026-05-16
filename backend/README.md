@@ -7,13 +7,13 @@ Direktori ini berisi logika pusat dari FlowAgent yang mengimplementasikan siklus
 Backend FlowAgent dirancang untuk kemandirian dan keamanan:
 
 ### 1. SENSE (Extraction Tool)
-Menggunakan **Gemini 2.0 Flash** untuk kecepatan tinggi dalam memproses file multimedia.
+Menggunakan **Gemini 2.5 Flash** untuk kecepatan tinggi dalam memproses file multimedia.
 - **Input**: Foto nota, Audio (Voice Note), atau Chat mentah.
 - **Output**: Validated Pydantic models (TransactionPayload).
 - **Guardrails**: Skor kepercayaan (*confidence score*) minimum 0.85 untuk *automatic approval*.
 
 ### 2. THINK & ACT (Action Tool)
-Menggunakan **Gemini 2.0 Pro** untuk penalaran mendalam.
+Menggunakan **Gemini 2.5 Pro** untuk penalaran mendalam.
 - **Native Function Calling**: Menggunakan fungsi `create_action_draft` secara asli di dalam model AI untuk menjamin struktur output.
 - **Self-Correction Loop**: Jika output AI melanggar skema data, sistem akan memberikan umpan balik ke AI dan meminta perbaikan otomatis (maks 2 kali *retry*).
 - **Autonomous Planning**: Agent memiliki otonomi untuk memutuskan "Tidak Ada Aksi" jika kondisi keuangan dinilai aman.

@@ -23,12 +23,14 @@ import { useState } from "react";
 import App from "../App";
 import { CameraModal, VoiceRecorder, ReviewCard } from "../domains/ingestion";
 import { ActionCenterFeed } from "../domains/agent";
-import { MOCK_PAYLOAD, MOCK_ACTIONS } from "../core/mocks/demo-data";
+
 import { Button } from "../core/ui";
 import type { TransactionPayload } from "../core/types/schema";
 import { useAgentActions } from "../domains/agent/hooks/useAgentActions";
 import { HistoryView } from "../domains/history";
 import { ProfileView } from "../domains/profile";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8001";
 
 // ─── Bottom Navigation ──────────────────────────────────────────────
 
@@ -109,7 +111,7 @@ function Layout() {
 function IngestionView() {
   const [showCamera, setShowCamera] = useState(false);
   const [showVoice, setShowVoice] = useState(false);
-  const [payload, setPayload] = useState<TransactionPayload | null>(MOCK_PAYLOAD);
+  const [payload, setPayload] = useState<TransactionPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
@@ -121,10 +123,10 @@ function IngestionView() {
     const formData = new FormData();
     formData.append("file", blob);
     formData.append("modality", modality);
-    formData.append("uid", "demo-user");
+    formData.append("uid", "test-user-v050");
 
     try {
-      const response = await fetch("http://localhost:8001/api/extract", {
+      const response = await fetch(`${API_BASE_URL}/api/extract`, {
         method: "POST",
         body: formData,
       });
@@ -143,9 +145,9 @@ function IngestionView() {
     try {
       const formData = new FormData();
       formData.append("payload_json", JSON.stringify(p));
-      formData.append("uid", "demo-user");
+      formData.append("uid", "test-user-v050");
 
-      const response = await fetch("http://localhost:8001/api/analyze", {
+      const response = await fetch(`${API_BASE_URL}/api/analyze`, {
         method: "POST",
         body: formData,
       });
@@ -167,10 +169,10 @@ function IngestionView() {
     try {
       const formData = new FormData();
       formData.append("text", textInput);
-      formData.append("uid", "demo-user");
+      formData.append("uid", "test-user-v050");
       formData.append("modality", "text");
 
-      const response = await fetch("http://localhost:8001/api/extract", {
+      const response = await fetch(`${API_BASE_URL}/api/extract`, {
         method: "POST",
         body: formData,
       });
@@ -216,7 +218,7 @@ function IngestionView() {
           style={{ width: "100%", padding: "1rem", borderRadius: "12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white", minHeight: "100px" }}
         />
         <Button
-          variant="accent"
+          variant="primary"
           size="sm"
           onClick={handleTextSubmit}
           disabled={loading || !textInput.trim()}
@@ -234,6 +236,10 @@ function IngestionView() {
             payload={payload}
             onApprove={handleApprove}
             capturedImage={capturedImage}
+            onCancel={() => {
+              setPayload(null);
+              setCapturedImage(null);
+            }}
           />
         ) : (
           <p className="text-caption" style={{ textAlign: "center", marginTop: "2rem" }}>
@@ -254,7 +260,7 @@ function IngestionView() {
       )}
       {showVoice && (
         <VoiceRecorder
-          onSend={(blob) => handleCapture(blob, "voice")}
+          onSend={(blob) => handleCapture(blob as any, "voice")}
           onCancel={() => setShowVoice(false)}
         />
       )}
@@ -263,7 +269,7 @@ function IngestionView() {
 }
 
 function AgentView() {
-  const { actions, loading, error, updateActionStatus } = useAgentActions("demo-user");
+  const { actions, loading, error, updateActionStatus } = useAgentActions("test-user-v050");
 
   if (error) {
     return (
@@ -286,8 +292,8 @@ function AgentView() {
         ) : actions.length > 0 ? (
           <ActionCenterFeed
             actions={actions}
-            onApprove={(id) => updateActionStatus(id, "approved")}
-            onReject={(id) => updateActionStatus(id, "rejected")}
+            onApprove={(id) => updateActionStatus(id.id, "approved")}
+            onReject={(id) => updateActionStatus(id.id, "rejected")}
           />
         ) : (
           <p className="text-caption text-center" style={{ marginTop: "2rem" }}>

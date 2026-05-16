@@ -35,10 +35,17 @@ const liquidityHistory = [
 ];
 
 export function PulseDashboard({ state }: PulseDashboardProps) {
-  const { liquid_assets, trapped_capital, liabilities, ai_metrics } = state;
+  // Defensive destructuring with defaults
+  const { 
+    liquid_assets = { cash_on_hand: 0, bank_balance: 0 }, 
+    trapped_capital = { receivables_total: 0, dead_stock_value: 0 }, 
+    liabilities = { payables_total: 0, upcoming_opex: 0 }, 
+    ai_metrics = { health_score: 0, cash_runway_days: 0, gross_revenue: 0, net_margin: 0, liquidity_risk_level: "low" } 
+  } = state || {};
+
   const navigate = useNavigate();
-  const totalCash = liquid_assets.cash_on_hand + liquid_assets.bank_balance;
-  const totalTrapped = trapped_capital.receivables_total + trapped_capital.dead_stock_value;
+  const totalCash = (liquid_assets.cash_on_hand || 0) + (liquid_assets.bank_balance || 0);
+  const totalTrapped = (trapped_capital.receivables_total || 0) + (trapped_capital.inventory_estimate || 0);
 
   return (
     <section className="pulse-dashboard fade-slide-up">
@@ -64,6 +71,20 @@ export function PulseDashboard({ state }: PulseDashboardProps) {
           </button>
         </div>
       </div>
+
+      {/* ── Onboarding Banner 🚀 ── */}
+      {totalCash === 0 && (
+        <div 
+          className="onboarding-banner fade-slide-up"
+          onClick={() => navigate("/profile")}
+        >
+          <div className="onboarding-banner__icon">🚀</div>
+          <div className="onboarding-banner__content">
+            <span className="onboarding-banner__title">Baru di FlowAgent?</span>
+            <span className="onboarding-banner__desc">Klik untuk atur saldo awal & posisi keuangan Anda.</span>
+          </div>
+        </div>
+      )}
 
       {/* ── Main 2x2 Grid ── */}
       <div className="pulse-dashboard__grid">

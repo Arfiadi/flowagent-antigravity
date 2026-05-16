@@ -242,3 +242,135 @@
   color: rgba(255, 255, 255, 0.3);
   margin-top: var(--fa-space-md);
 }
+
+/* ── Setup Modal ────────────────────────────────────────────── */
+
+.setup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--fa-space-md);
+}
+
+.setup-modal {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--fa-space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fa-space-md);
+}
+
+.setup-modal__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--fa-text-primary);
+  text-align: center;
+}
+
+.setup-modal__subtitle {
+  font-size: 0.85rem;
+  color: var(--fa-text-muted);
+  text-align: center;
+  margin-bottom: var(--fa-space-sm);
+}
+
+.setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fa-space-md);
+}
+
+.setup-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setup-form__group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--fa-text-secondary);
+}
+
+.setup-form__group input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--fa-radius-md);
+  padding: 12px;
+  color: var(--fa-text-primary);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.setup-form__group input:focus {
+  border-color: #00D8FF;
+}
+
+.setup-form__actions {
+  display: flex;
+  gap: var(--fa-space-sm);
+  margin-top: var(--fa-space-sm);
+}
+
+.setup-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--fa-radius-md);
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s;
+}
+
+.setup-btn--primary {
+  background: #00D8FF;
+  color: #000;
+}
+
+.setup-btn--secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--fa-text-primary);
+}
+
+.setup-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Danger Zone Specific ───────────────────────────────────── */
+
+.text-danger {
+  color: #FF3366 !important;
+}
+
+.profile-card--danger {
+  border: 1px solid rgba(255, 51, 102, 0.3);
+  background: rgba(255, 51, 102, 0.05);
+  box-shadow: 0 0 20px rgba(255, 51, 102, 0.1);
+}
+
+.settings-btn--destructive {
+  background: rgba(255, 51, 102, 0.1) !important;
+  border-color: rgba(255, 51, 102, 0.4) !important;
+  color: #FF3366 !important;
+  margin-top: 8px;
+}
+
+.settings-btn--destructive:hover {
+  background: rgba(255, 51, 102, 0.2) !important;
+  box-shadow: 0 0 15px rgba(255, 51, 102, 0.2);
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}

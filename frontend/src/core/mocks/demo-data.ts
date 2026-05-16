@@ -10,10 +10,11 @@ import type { TransactionPayload, AgentAction } from "../types/schema";
 
 export const MOCK_PAYLOAD: TransactionPayload = {
   type: "receivable_created",
-  amount: 2_000_000,
-  entity: "Pak Budi",
-  due_date: "2026-05-22",
-  confidence_score: 0.72,
+  amount: 1250000,
+  entity_name: "Toko Berkah",
+  due_date: "2024-05-20",
+  category: "Lainnya",
+  confidence_score: 0.94,
 };
 
 export const MOCK_ACTIONS: AgentAction[] = [

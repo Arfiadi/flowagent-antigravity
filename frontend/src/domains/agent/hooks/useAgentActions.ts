@@ -3,7 +3,7 @@ import { collection, query, where, orderBy, onSnapshot, doc, updateDoc, deleteDo
 import { db } from "../../../core/config/firebase";
 import type { AgentAction } from "../../../core/types/schema";
 
-export function useAgentActions(uid: string = "demo-user") {
+export function useAgentActions(uid: string = "test-user-v050") {
   const [actions, setActions] = useState<AgentAction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);

@@ -55,8 +55,8 @@ export function CameraModal({ onCapture, onClose }: CameraModalProps) {
           <Button variant="ghost" size="lg" onClick={handleCancel}>
             Batal
           </Button>
-          <Button variant="accent" size="lg" onClick={handleCapture} disabled={!!error}>
-            📷 Ambil Foto
+          <Button variant="primary" size="lg" onClick={handleCapture} disabled={!!error}>
+            Ambil Foto
           </Button>
         </div>
       </GlassCard>

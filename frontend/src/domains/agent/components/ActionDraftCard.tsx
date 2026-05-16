@@ -64,8 +64,8 @@ export function ActionDraftCard({
           <Button variant="ghost" size="sm" onClick={() => onReject(action)}>
             Tolak
           </Button>
-          <Button variant="accent" size="sm" onClick={() => onApprove(action)}>
-            Setujui & Kirim
+          <Button variant="primary" size="sm" onClick={() => onApprove(action)}>
+            Setujui
           </Button>
         </div>
       )}

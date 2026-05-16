@@ -125,9 +125,9 @@ export interface AgentAction {
 // ─── Payload: TransactionPayload (AI Extraction Output) ─────────────
 
 export interface TransactionPayload {
-  type: Extract<TransactionType, "cash_in" | "cash_out" | "receivable_created" | "payable_created">;
+  type: Extract<TransactionType, "cash_in" | "cash_out" | "receivable_created" | "receivable_paid" | "payable_created" | "payable_paid">;
   amount: number;
-  entity: string;
+  entity_name: string;
   category: string;
   due_date: string | null; // ISO 8601 date or null
   confidence_score: number; // 0.0 – 1.0
