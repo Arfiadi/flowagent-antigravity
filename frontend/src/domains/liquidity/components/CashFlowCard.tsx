@@ -5,6 +5,7 @@
  * Displays a single financial metric inside a GlassCard.
  */
 
+import { useEffect, useState } from "react";
 import { GlassCard } from "../../../core/ui";
 import "./CashFlowCard.css";
 
@@ -19,7 +20,6 @@ interface CashFlowCardProps {
 
 /**
  * Formats a number into Indonesian Rupiah string.
- * e.g. 2500000 → "Rp 2.500.000"
  */
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -35,11 +35,37 @@ export function CashFlowCard({
   value,
   color = "default",
 }: CashFlowCardProps) {
+  const [displayValue, setDisplayValue] = useState(value);
+
+  // Simple counting animation
+  useEffect(() => {
+    let start = displayValue;
+    const end = value;
+    if (start === end) return;
+
+    const duration = 500; // ms
+    const incrementTime = 20;
+    const steps = duration / incrementTime;
+    const increment = (end - start) / steps;
+
+    const timer = setInterval(() => {
+      start += increment;
+      if ((increment > 0 && start >= end) || (increment < 0 && start <= end)) {
+        clearInterval(timer);
+        setDisplayValue(end);
+      } else {
+        setDisplayValue(start);
+      }
+    }, incrementTime);
+
+    return () => clearInterval(timer);
+  }, [value]);
+
   return (
     <GlassCard className="cashflow-card fade-slide-up">
       <span className="cashflow-card__label text-overline">{label}</span>
       <span className={`cashflow-card__value cashflow-card__value--${color}`}>
-        {formatRupiah(value)}
+        {formatRupiah(displayValue)}
       </span>
     </GlassCard>
   );

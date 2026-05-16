@@ -6,6 +6,7 @@
 @import "./core/theme/typography.css";
 @import "./core/theme/glassmorphism.css";
 @import "./core/theme/animations.css";
+@import "./app/Navigation.css";
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 

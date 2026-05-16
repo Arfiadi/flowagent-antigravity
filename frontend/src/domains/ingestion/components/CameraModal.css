@@ -1,0 +1,60 @@
+.camera-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--fa-space-md);
+}
+
+.camera-modal {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fa-space-md);
+  padding: var(--fa-space-md);
+}
+
+.camera-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.camera-modal__viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  background: #000;
+  border-radius: var(--fa-radius-md);
+  overflow: hidden;
+}
+
+.camera-modal__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-modal__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.camera-modal__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--fa-space-sm);
+}
+
+.camera-modal__error {
+  padding: var(--fa-space-lg);
+  text-align: center;
+  background: rgba(255, 51, 102, 0.1);
+  border-radius: var(--fa-radius-md);
+}
