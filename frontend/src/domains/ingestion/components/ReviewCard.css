@@ -1,7 +1,64 @@
+.review-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fa-space-lg);
+}
+
+.review-section__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--fa-text-primary);
+  letter-spacing: 1px;
+}
+
+/* ── Image Preview Card ─────────────────────────────── */
+.review-preview {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.review-preview__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--fa-space-md);
+}
+
+.review-preview__label {
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.review-preview__badge {
+  font-size: 0.65rem;
+  background: rgba(0, 216, 255, 0.15);
+  color: #00D8FF;
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+
+.review-preview__image-container {
+  width: 100%;
+  max-height: 240px;
+  border-radius: var(--fa-radius-md);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.review-preview__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* ── Draft Form Card ──────────────────────────────── */
 .review-card {
   display: flex;
   flex-direction: column;
   gap: var(--fa-space-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .review-card--warning {
@@ -9,34 +66,180 @@
   box-shadow: 0 0 20px rgba(255, 184, 0, 0.08);
 }
 
+.review-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.review-card__header-title {
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
 .review-card__confidence {
   display: flex;
   align-items: center;
-  gap: var(--fa-space-sm);
+  gap: var(--fa-space-xs);
 }
 
 .review-card__warning-badge {
-  font-size: var(--fa-font-size-xs);
+  font-size: 0.65rem;
   color: var(--fa-color-warning);
-  font-weight: var(--fa-font-weight-semibold);
+  font-weight: 600;
+  background: rgba(255, 184, 0, 0.15);
+  padding: 3px 8px;
+  border-radius: 8px;
 }
 
+/* ── Form Grid ──────────────────────────────────────── */
 .review-card__body {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--fa-space-sm) var(--fa-space-lg);
+  gap: var(--fa-space-md);
 }
 
 .review-card__field {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
-.review-card__actions {
+.review-card__field--full {
+  grid-column: 1 / -1;
+}
+
+.review-card__field-label {
+  font-size: 0.6rem;
+  color: var(--fa-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.review-card__field-row {
   display: flex;
-  justify-content: flex-end;
-  gap: var(--fa-space-sm);
-  padding-top: var(--fa-space-sm);
-  border-top: 1px solid var(--fa-surface-border);
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--fa-radius-sm);
+  padding: 8px 10px;
+}
+
+.review-card__field-icon {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.review-card__field-input {
+  background: transparent;
+  border: none;
+  color: var(--fa-text-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+}
+
+.review-card__field-input::placeholder {
+  color: var(--fa-text-muted);
+  opacity: 0.6;
+}
+
+/* Amount with warning highlight */
+.review-card__field-row--warning {
+  border-color: rgba(255, 184, 0, 0.4);
+  background: rgba(255, 184, 0, 0.05);
+}
+
+.review-card__field-row--warning .review-card__field-input {
+  color: var(--fa-color-warning);
+  font-weight: 700;
+}
+
+/* ── Type Badge Row ──────────────────────────────── */
+.review-card__type-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  grid-column: 1 / -1;
+}
+
+.review-card__type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 216, 255, 0.1);
+  border: 1px solid rgba(0, 216, 255, 0.3);
+  padding: 6px 12px;
+  border-radius: 12px;
+  color: #00D8FF;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ── Low Confidence Warning ──────────────────────── */
+.review-card__warning-text {
+  font-size: 0.7rem;
+  color: var(--fa-color-warning);
+  font-style: italic;
+  margin: 0;
+  grid-column: 1 / -1;
+}
+
+/* ── Notes ───────────────────────────────────────── */
+.review-card__notes {
+  grid-column: 1 / -1;
+}
+
+.review-card__notes-textarea {
+  width: 100%;
+  min-height: 60px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--fa-radius-sm);
+  padding: 10px;
+  color: var(--fa-text-secondary);
+  font-size: 0.8rem;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+}
+
+.review-card__notes-textarea::placeholder {
+  color: var(--fa-text-muted);
+  opacity: 0.5;
+}
+
+/* ── Approve CTA Button ─────────────────────────── */
+.review-card__approve-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--fa-radius-lg);
+  background: linear-gradient(135deg, #00D8FF, #00B4CC);
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.review-card__approve-btn:hover {
+  background: linear-gradient(135deg, #33E0FF, #00D8FF);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 216, 255, 0.3);
+}
+
+.review-card__approve-btn:active {
+  transform: scale(0.98);
 }

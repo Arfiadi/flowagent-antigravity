@@ -15,10 +15,10 @@ interface ActionDraftCardProps {
   onReject: (action: AgentAction) => void;
 }
 
-const ACTION_TYPE_LABELS: Record<AgentAction["action_type"], string> = {
-  whatsapp_collection: "📱 Penagihan WhatsApp",
-  supplier_negotiation: "🤝 Negosiasi Supplier",
-  stock_warning: "📦 Peringatan Stok",
+const ACTION_UI_CONFIG: Record<AgentAction["action_type"], { label: string; colorClass: string; icon: string }> = {
+  whatsapp_collection: { label: "Penagihan WhatsApp", colorClass: "action-card--positive", icon: "📱" },
+  supplier_negotiation: { label: "Negosiasi Supplier", colorClass: "action-card--warning", icon: "🤝" },
+  stock_warning: { label: "Peringatan Stok", colorClass: "action-card--critical", icon: "📦" },
 };
 
 export function ActionDraftCard({
@@ -27,30 +27,35 @@ export function ActionDraftCard({
   onReject,
 }: ActionDraftCardProps) {
   const isPending = action.status === "pending_review";
+  const config = ACTION_UI_CONFIG[action.action_type];
 
   return (
     <GlassCard
-      variant="accent"
-      className={`action-card fade-slide-up ${!isPending ? "action-card--resolved" : ""}`}
+      variant="default"
+      className={`action-card ${config.colorClass} fade-slide-up ${!isPending ? "action-card--resolved" : ""}`}
     >
       {/* Header */}
       <div className="action-card__header">
-        <span className="action-card__type text-overline">
-          {ACTION_TYPE_LABELS[action.action_type]}
-        </span>
+        <div className="action-card__badge">
+          <span className="action-card__icon">{config.icon}</span>
+          <span className="action-card__type text-overline">{config.label}</span>
+        </div>
         <span className="action-card__target text-subheading">
           {action.target_entity}
         </span>
       </div>
 
       {/* Message preview */}
-      <blockquote className="action-card__message">
-        "{action.message_body}"
-      </blockquote>
+      <div className="action-card__message-container">
+        <blockquote className="action-card__message">
+          "{action.message_body}"
+        </blockquote>
+      </div>
 
       {/* Risk context */}
       <p className="action-card__context text-caption">
-        💡 {action.risk_context}
+        <span className="action-card__context-icon">💡</span>
+        <span>{action.risk_context}</span>
       </p>
 
       {/* Actions */}
@@ -59,7 +64,7 @@ export function ActionDraftCard({
           <Button variant="ghost" size="sm" onClick={() => onReject(action)}>
             Tolak
           </Button>
-          <Button variant="positive" size="sm" onClick={() => onApprove(action)}>
+          <Button variant="accent" size="sm" onClick={() => onApprove(action)}>
             Setujui & Kirim
           </Button>
         </div>

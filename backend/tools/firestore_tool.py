@@ -130,6 +130,7 @@ def write_transaction(uid: str, payload: TransactionPayload, modality: str = "ph
         "type": payload.type,
         "amount": payload.amount,
         "entity_name": payload.entity,
+        "category": payload.category,
         "due_date": payload.due_date,
         "source_modality": modality,
         "confidence_score": payload.confidence_score,
@@ -138,8 +139,8 @@ def write_transaction(uid: str, payload: TransactionPayload, modality: str = "ph
     }
     _, doc_ref = db.collection("transactions").add(tx_data)
     logger.info(
-        "Transaction written: id=%s, type=%s, amount=%.0f",
-        doc_ref.id, payload.type, payload.amount,
+        "Transaction written: id=%s, type=%s, amount=%.0f, category=%s",
+        doc_ref.id, payload.type, payload.amount, payload.category
     )
 
     # Step 2 + 3: Update state and recalculate metrics
@@ -209,6 +210,16 @@ def _update_and_recalculate(uid: str, payload: TransactionPayload, now: str) -> 
             state["liquid_assets"]["cash_on_hand"] = max(
                 0, state["liquid_assets"].get("cash_on_hand", 0) - payload.amount
             )
+            # Update specialized buckets based on category
+            if payload.category.lower() == "stok":
+                state["trapped_capital"]["inventory_estimate"] = (
+                    state["trapped_capital"].get("inventory_estimate", 0) + payload.amount
+                )
+            elif payload.category.lower() in ["operasional", "gaji"]:
+                # If it's a cash out for opex, it reduces the *upcoming* opex burden
+                state["liabilities"]["upcoming_opex"] = max(
+                    0, state["liabilities"].get("upcoming_opex", 0) - payload.amount
+                )
 
         case "receivable_created":
             # Append to granular receivables array

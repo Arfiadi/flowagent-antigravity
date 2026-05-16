@@ -1,21 +1,148 @@
+/* ── CashFlowCard — Premium Glassmorphism Redesign ── */
+
 .cashflow-card {
   display: flex;
   flex-direction: column;
-  gap: var(--fa-space-xs);
-  min-width: 0;
+  gap: var(--fa-space-sm);
+  padding: var(--fa-space-md) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: var(--fa-radius-lg) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cashflow-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ── Glow Effects ───────────────────────────────────────────── */
+.cashflow-card--positive:hover { box-shadow: 0 8px 32px rgba(0, 216, 255, 0.15); }
+.cashflow-card--warning:hover { box-shadow: 0 8px 32px rgba(255, 179, 0, 0.15); }
+.cashflow-card--critical:hover { box-shadow: 0 8px 32px rgba(255, 51, 102, 0.15); }
+.cashflow-card--info:hover { box-shadow: 0 8px 32px rgba(0, 216, 255, 0.15); }
+
+/* ── Header ─────────────────────────────────────────────────── */
+
+.cashflow-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .cashflow-card__label {
-  white-space: nowrap;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fa-text-muted);
+  opacity: 0.7;
+}
+
+.cashflow-card__icon {
+  font-size: 1.1rem;
+}
+
+/* ── Main Content ───────────────────────────────────────────── */
+
+.cashflow-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .cashflow-card__value {
-  font-size: var(--fa-font-size-xl);
-  font-weight: var(--fa-font-weight-bold);
-  color: var(--fa-text-primary);
-  transition: color var(--fa-transition-fast);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.cashflow-card__value--positive { color: var(--fa-color-positive); }
-.cashflow-card__value--warning  { color: var(--fa-color-warning); }
-.cashflow-card__value--critical { color: var(--fa-color-critical); }
+.cashflow-card__value--positive { color: #00D8FF; }
+.cashflow-card__value--warning { color: #FFB300; }
+.cashflow-card__value--critical { color: #FF3366; }
+.cashflow-card__value--info { color: #00D8FF; }
+
+/* ── Trend Indicator ────────────────────────────────────────── */
+
+.cashflow-card__trend {
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trend-up { color: #00D8FF; }
+.trend-down { color: #FF3366; }
+
+.trend-label {
+  font-weight: 500;
+  color: var(--fa-text-muted);
+  font-size: 0.6rem;
+}
+
+/* ── Subtitle ───────────────────────────────────────────────── */
+
+.cashflow-card__subtitle {
+  font-size: 0.7rem;
+  color: var(--fa-text-secondary);
+}
+
+/* ── Progress Bar Mini ──────────────────────────────────────── */
+
+.cashflow-card__progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.progress-bar-mini {
+  height: 6px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  display: flex;
+  overflow: hidden;
+}
+
+.progress-bar-mini__fill {
+  height: 100%;
+  transition: width 1s ease-in-out;
+}
+
+.progress-bar-mini__fill--a { background: #00D8FF; box-shadow: 0 0 10px rgba(0, 216, 255, 0.3); }
+.progress-bar-mini__fill--b { background: rgba(255, 255, 255, 0.2); }
+
+.progress-bar-mini__legend {
+  display: flex;
+  gap: 12px;
+}
+
+.legend-item {
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: var(--fa-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.dot--a { background: #00D8FF; }
+.dot--b { background: rgba(255, 255, 255, 0.4); }
+
+/* ── Chart ──────────────────────────────────────────────────── */
+
+.cashflow-card__chart {
+  height: 40px;
+  margin-top: var(--fa-space-xs);
+  opacity: 0.6;
+}

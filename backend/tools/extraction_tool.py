@@ -86,7 +86,7 @@ async def extract_from_text(text_input: str) -> TransactionPayload:
     prompt = _load_sense_prompt()
 
     response = client.models.generate_content(
-        model=settings.GEMINI_MODEL,
+        model=settings.GEMINI_SENSE_MODEL,
         contents=f"{prompt}\n\nInput teks:\n{text_input}",
         config=genai_types.GenerateContentConfig(
             temperature=0.1,
@@ -95,6 +95,37 @@ async def extract_from_text(text_input: str) -> TransactionPayload:
     )
 
     logger.info("Gemini extraction completed for text input")
+    return _parse_response(response.text)
+
+
+async def extract_from_audio(audio_bytes: bytes, mime_type: str = "audio/mp3") -> TransactionPayload:
+    """
+    Extract transaction data from a voice recording.
+
+    Args:
+        audio_bytes: Raw bytes of the audio file.
+        mime_type: MIME type of the audio (e.g., audio/mp3, audio/wav).
+
+    Returns:
+        Validated TransactionPayload.
+    """
+    client = get_genai_client()
+    settings = get_settings()
+    prompt = _load_sense_prompt()
+
+    response = client.models.generate_content(
+        model=settings.GEMINI_SENSE_MODEL,
+        contents=[
+            genai_types.Part.from_bytes(data=audio_bytes, mime_type=mime_type),
+            prompt,
+        ],
+        config=genai_types.GenerateContentConfig(
+            temperature=0.1,
+            response_mime_type="application/json",
+        ),
+    )
+
+    logger.info("Gemini extraction completed for audio (%d bytes)", len(audio_bytes))
     return _parse_response(response.text)
 
 

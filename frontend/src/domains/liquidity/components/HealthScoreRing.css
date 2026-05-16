@@ -1,62 +1,72 @@
-.health-ring {
+/* ── HealthScoreRing Redesign: Gauge Chart ─── */
+
+.health-gauge {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 160px;
-  height: 160px;
-}
-
-.health-ring__svg {
   width: 100%;
-  height: 100%;
-}
-
-.health-ring__track {
-  stroke: var(--fa-surface-border);
-}
-
-.health-ring__progress {
-  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.health-ring__label {
-  position: absolute;
+  max-width: 280px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.health-ring__value {
-  font-size: var(--fa-font-size-2xl);
-  font-weight: var(--fa-font-weight-bold);
-  line-height: 1;
+.health-gauge__svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
-.health-ring__caption {
-  font-size: var(--fa-font-size-xs);
+.health-gauge__progress {
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Content / Text Overlay ─────────────────────────────────── */
+
+.health-gauge__content {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.health-gauge__score-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.health-gauge__value {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--fa-text-primary);
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(0, 216, 255, 0.3);
+}
+
+.health-gauge__scale {
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--fa-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  opacity: 0.5;
+}
+
+.health-gauge__caption {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--fa-text-muted);
   margin-top: 4px;
 }
 
-/* ─── Color Variants ─────────────────────────────────────────────── */
-
-.health-ring--low .health-ring__progress {
-  stroke: var(--fa-color-positive);
-  filter: drop-shadow(0 0 8px var(--fa-color-positive));
+.health-gauge__insight {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #FF3366;
+  margin-top: 8px;
+  background: rgba(255, 51, 102, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 51, 102, 0.2);
 }
-.health-ring--low .health-ring__value { color: var(--fa-color-positive); }
-
-.health-ring--medium .health-ring__progress {
-  stroke: var(--fa-color-warning);
-  filter: drop-shadow(0 0 8px var(--fa-color-warning));
-}
-.health-ring--medium .health-ring__value { color: var(--fa-color-warning); }
-
-.health-ring--high .health-ring__progress {
-  stroke: var(--fa-color-critical);
-  filter: drop-shadow(0 0 8px var(--fa-color-critical));
-}
-.health-ring--high .health-ring__value { color: var(--fa-color-critical); }

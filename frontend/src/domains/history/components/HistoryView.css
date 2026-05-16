@@ -1,0 +1,214 @@
+/* ── HistoryView — Premium dark glassmorphism history page ──── */
+
+.history-view {
+  padding: var(--fa-space-md);
+  padding-bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fa-space-md);
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+
+.history-view__header {
+  text-align: center;
+  margin-bottom: var(--fa-space-xs);
+}
+
+.history-view__title {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--fa-text-primary);
+}
+
+.history-view__subtitle {
+  color: var(--fa-text-muted);
+  margin-top: 4px;
+}
+
+/* ── Summary Cards ──────────────────────────────────────────── */
+
+.history-view__summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--fa-space-sm);
+}
+
+.history-summary-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--fa-space-sm) var(--fa-space-md) !important;
+}
+
+.history-summary-card__label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fa-text-muted);
+}
+
+.history-summary-card__value {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.history-summary-card__value--positive {
+  color: #00D8FF;
+}
+
+.history-summary-card__value--critical {
+  color: #FF3366;
+}
+
+/* ── Filter Tabs ────────────────────────────────────────────── */
+
+.history-view__tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 2px 0;
+}
+
+.history-view__tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.history-tab {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--fa-text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--fa-transition-fast);
+}
+
+.history-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.history-tab--active {
+  background: rgba(0, 216, 255, 0.15);
+  color: #00D8FF;
+  border-color: rgba(0, 216, 255, 0.3);
+}
+
+/* ── Transaction List ───────────────────────────────────────── */
+
+.history-view__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fa-space-md);
+}
+
+/* ── Date Group ─────────────────────────────────────────────── */
+
+.history-group__header {
+  display: flex;
+  align-items: center;
+  gap: var(--fa-space-sm);
+  margin-bottom: var(--fa-space-xs);
+}
+
+.history-group__date {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fa-text-muted);
+  white-space: nowrap;
+}
+
+.history-group__line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.history-group__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fa-space-xs);
+}
+
+/* ── Loading Skeleton ───────────────────────────────────────── */
+
+.history-view__loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fa-space-sm);
+}
+
+.history-skeleton {
+  height: 64px;
+  border-radius: var(--fa-radius-md);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Empty State ────────────────────────────────────────────── */
+
+.history-view__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fa-space-sm);
+  padding: var(--fa-space-xl) var(--fa-space-md);
+  text-align: center;
+}
+
+.history-view__empty-icon {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.history-view__empty-text {
+  font-size: 0.8rem;
+  color: var(--fa-text-muted);
+  line-height: 1.5;
+}
+
+.history-view__empty-btn {
+  margin-top: var(--fa-space-xs);
+  padding: 10px 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 216, 255, 0.3);
+  background: rgba(0, 216, 255, 0.1);
+  color: #00D8FF;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--fa-transition-fast);
+}
+
+.history-view__empty-btn:hover {
+  background: rgba(0, 216, 255, 0.2);
+}
+
+/* ── Error State ────────────────────────────────────────────── */
+
+.history-view__error {
+  text-align: center;
+  padding: var(--fa-space-lg);
+  color: var(--fa-color-critical);
+}

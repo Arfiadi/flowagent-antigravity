@@ -103,6 +103,7 @@ export interface Transaction {
   type: TransactionType;
   amount: number;
   entity_name: string;
+  category: string;
   due_date: string | null; // ISO 8601 date or null
   source_modality: SourceModality;
   confidence_score: number; // 0.0 – 1.0
@@ -127,6 +128,7 @@ export interface TransactionPayload {
   type: Extract<TransactionType, "cash_in" | "cash_out" | "receivable_created" | "payable_created">;
   amount: number;
   entity: string;
+  category: string;
   due_date: string | null; // ISO 8601 date or null
   confidence_score: number; // 0.0 – 1.0
 }

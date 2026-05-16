@@ -176,6 +176,7 @@ class Transaction(BaseModel):
     type: TransactionType
     amount: float = Field(gt=0, description="Transaction amount in IDR")
     entity_name: str = Field(min_length=1, description="Name of counterparty")
+    category: str = Field(default="Lainnya", description="Kategori transaksi")
     due_date: Optional[str] = Field(default=None, description="ISO 8601 date or null")
     source_modality: SourceModality
     confidence_score: float = Field(ge=0, le=1, description="AI extraction confidence")
@@ -209,6 +210,7 @@ class TransactionPayload(BaseModel):
     type: ExtractionTransactionType
     amount: float = Field(gt=0, description="Extracted amount in IDR")
     entity: str = Field(min_length=1, description="Extracted entity name")
+    category: str = Field(default="Lainnya", description="Kategori transaksi (e.g., Stok, Operasional, Gaji)")
     due_date: Optional[str] = Field(default=None, description="ISO 8601 date or null")
     confidence_score: float = Field(ge=0, le=1, description="Model confidence")
 

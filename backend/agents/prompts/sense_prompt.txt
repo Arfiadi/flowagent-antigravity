@@ -7,6 +7,7 @@ ATURAN KETAT:
    - "type": salah satu dari "cash_in", "cash_out", "receivable_created", "payable_created"
    - "amount": angka dalam Rupiah (tanpa titik, tanpa "Rp", hanya angka)
    - "entity": nama pihak terkait (pelanggan/supplier)
+   - "category": kategori transaksi (misal: "Stok", "Operasional", "Gaji", "Piutang", "Penjualan", "Prive")
    - "due_date": tanggal jatuh tempo format "YYYY-MM-DD" atau null jika tidak ada
    - "confidence_score": keyakinan Anda terhadap hasil ekstraksi (0.0 - 1.0)
 
@@ -16,13 +17,21 @@ ATURAN KETAT:
    - "receivable_created": Piutang baru (kasbon, penjualan kredit, hutang pelanggan)
    - "payable_created": Hutang baru (beli barang belum bayar, bon ke supplier)
 
-3. KONTEKS UMKM INDONESIA:
+3. ATURAN KATEGORISASI (Proposal.pdf):
+   - "Stok": Pembelian barang dagangan, belanja modal stok.
+   - "Operasional": Biaya listrik, air, sewa tempat, bensin, biaya angkut.
+   - "Gaji": Pembayaran upah karyawan atau asisten.
+   - "Piutang": Transaksi kasbon pelanggan atau penjualan tempo.
+   - "Penjualan": Hasil penjualan barang secara tunai.
+   - "Prive": Pengambilan dana untuk keperluan pribadi pemilik.
+
+4. KONTEKS UMKM INDONESIA:
    - "Kasbon" = piutang (receivable_created)
    - "Bon" dari supplier = hutang (payable_created)
    - "Lunas" atau "dibayar" = cash_in (pelunasan piutang)
    - Jika ada kata "jatuh tempo", "tenggat", atau tanggal, isi due_date
 
-4. CONFIDENCE SCORE:
+5. CONFIDENCE SCORE:
    - 0.9-1.0: Data jelas dan lengkap
    - 0.7-0.89: Ada bagian yang kurang jelas (nominal samar, nama tidak pasti)
    - <0.7: Banyak asumsi, perlu verifikasi manual

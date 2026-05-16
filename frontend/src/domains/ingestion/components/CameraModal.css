@@ -48,8 +48,12 @@
 
 .camera-modal__actions {
   display: flex;
-  justify-content: center;
+  gap: var(--fa-space-md);
   margin-top: var(--fa-space-sm);
+}
+
+.camera-modal__actions > * {
+  flex: 1;
 }
 
 .camera-modal__error {

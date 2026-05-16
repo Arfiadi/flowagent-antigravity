@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings
 from models import TransactionPayload, AgentAction
-from tools.extraction_tool import extract_from_image, extract_from_text
+from tools.extraction_tool import extract_from_image, extract_from_text, extract_from_audio
 from tools.firestore_tool import (
     read_business_state,
     read_recent_transactions,
@@ -47,7 +47,12 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -111,12 +116,18 @@ async def extract_transaction(
                 image_bytes=image_bytes,
                 mime_type=file.content_type or "image/jpeg",
             )
+        elif file and modality in ("voice", "audio"):
+            audio_bytes = await file.read()
+            payload = await extract_from_audio(
+                audio_bytes=audio_bytes,
+                mime_type=file.content_type or "audio/mp3",
+            )
         elif text:
             payload = await extract_from_text(text)
         else:
             raise HTTPException(
                 status_code=400,
-                detail="Either 'file' (for photo) or 'text' must be provided.",
+                detail="Either 'file' (for photo/voice) or 'text' must be provided.",
             )
 
         logger.info(
@@ -173,24 +184,25 @@ async def analyze_and_act(
                 "reason": "No business state found to analyze.",
             }
 
-        # Step 4: Generate action if health score warrants it
+        # Step 4: Autonomous Planning (No hardcoded if-else)
+        logger.info("Starting autonomous reasoning loop for state analysis...")
+
+        # Fetch historical context for AI memory (anti-duplication)
+        recent_tx = read_recent_transactions(uid, limit=20)
+        recent_actions = read_recent_actions(uid, limit=10)
+
+        action = await generate_action_draft(
+            state=state,
+            recent_transactions=recent_tx,
+            recent_actions=recent_actions,
+        )
+
         action_id = None
-        if state.ai_metrics.health_score < 1.5:
-            logger.info(
-                "Health score %.2f < 1.5, generating action draft...",
-                state.ai_metrics.health_score,
-            )
-
-            # Fetch historical context for AI memory (anti-duplication)
-            recent_tx = read_recent_transactions(uid, limit=20)
-            recent_actions = read_recent_actions(uid, limit=10)
-
-            action = await generate_action_draft(
-                state=state,
-                recent_transactions=recent_tx,
-                recent_actions=recent_actions,
-            )
+        if action:
             action_id = write_action(uid, action)
+            logger.info("Autonomous Agent created action: %s", action_id)
+        else:
+            logger.info("Autonomous Agent evaluated state as SAFE. No action generated.")
 
         return {
             "status": "complete",

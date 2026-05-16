@@ -1,17 +1,29 @@
 import { useState, useRef, useCallback } from "react";
 
 export function useCamera() {
-  const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  }, []);
 
   const startCamera = useCallback(async () => {
     try {
       setError(null);
+      // Stop any existing stream first
+      stopCamera();
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
       });
-      setStream(mediaStream);
+      streamRef.current = mediaStream;
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
@@ -19,14 +31,7 @@ export function useCamera() {
       console.error("Camera access denied:", err);
       setError("Tidak dapat mengakses kamera. Pastikan izin telah diberikan.");
     }
-  }, []);
-
-  const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-      setStream(null);
-    }
-  }, [stream]);
+  }, [stopCamera]);
 
   const capturePhoto = useCallback((): string | null => {
     if (!videoRef.current) return null;
@@ -41,5 +46,5 @@ export function useCamera() {
     return canvas.toDataURL("image/jpeg", 0.8);
   }, []);
 
-  return { startCamera, stopCamera, capturePhoto, videoRef, stream, error };
+  return { startCamera, stopCamera, capturePhoto, videoRef, error };
 }

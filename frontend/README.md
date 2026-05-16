@@ -1,73 +1,40 @@
-# React + TypeScript + Vite
+# FlowAgent Frontend 📱
+**Premium AI Financial Dashboard (PWA)**
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Antarmuka FlowAgent dirancang untuk memberikan pengalaman *fintech* kelas atas dengan fokus pada kecepatan dan kemudahan penggunaan bagi pemilik UMKM.
 
-Currently, two official plugins are available:
+## 🎨 Design System: Neon Glassmorphism
+Aplikasi ini menggunakan sistem desain custom berbasis **Vanilla CSS** dengan prinsip:
+- **Glassmorphism**: Lapisan transparan dengan efek *blur* mendalam (20px) untuk kesan modern.
+- **Neon Accents**:
+  - **Aqua (#00D8FF)**: Simbol pertumbuhan (Pemasukan/Cash).
+  - **Pink (#FF3366)**: Simbol risiko/perhatian (Pengeluaran/Hutang).
+  - **Gold (#FFB300)**: Simbol peringatan/sedang diproses.
+- **Micro-animations**: Transisi halus pada kartu metrik dan bar progres.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🧱 Struktur Domain
+Aplikasi dibagi menjadi beberapa modul fungsional:
+- `liquidity`: Dashboard utama dengan *Gauge Chart* dan tren likuiditas.
+- `history`: AI Extraction Feed (riwayat transaksi cerdas).
+- `ingest`: Antarmuka input multimodal (Kamera/Voice).
+- `agent`: Pusat Aksi (HITL) untuk menyetujui rekomendasi AI.
+- `profile`: Konteks bisnis dan pengaturan toko.
 
-## React Compiler
+## ⚡ Fitur Utama
+1. **Real-time Synchronization**: Menggunakan Firebase SDK untuk memperbarui dashboard secara instan saat ada perubahan di database.
+2. **AI Action Feedback**: Notifikasi interaktif dan draf pesan WhatsApp yang siap dikirim.
+3. **PWA Capabilities**: Mendukung instalasi di ponsel sebagai aplikasi native dan akses kamera/mikrofon langsung dari browser.
+4. **Interactive Gauge**: Visualisasi kesehatan keuangan yang intuitif dengan skala 5.00.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Scripts
+- `npm run dev`: Menjalankan server pengembangan.
+- `npm run build`: Membuat *production bundle*.
+- `npm run preview`: Meninjau hasil build secara lokal.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 📁 Environment
+Pastikan file `.env` diisi dengan kredensial Firebase:
+```env
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_PROJECT_ID=...
+...
 ```

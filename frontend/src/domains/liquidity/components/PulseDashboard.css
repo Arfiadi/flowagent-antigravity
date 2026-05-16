@@ -1,39 +1,136 @@
+/* ── PulseDashboard — Layout & Premium Elements ── */
+
 .pulse-dashboard {
+  padding: var(--fa-space-md);
+  padding-bottom: 100px;
   display: flex;
   flex-direction: column;
-  gap: var(--fa-space-xl);
-  padding: var(--fa-space-lg);
-  max-width: 480px;
-  margin: 0 auto;
+  gap: var(--fa-space-lg);
 }
+
+/* ── Header ─────────────────────────────────────────────────── */
 
 .pulse-dashboard__header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--fa-space-md);
-  text-align: center;
+  margin-bottom: var(--fa-space-sm);
 }
 
-.pulse-dashboard__header-info {
+/* ── AI Insight Banner ✨ ────────────────────────────────────── */
+
+.ai-insight-banner {
+  display: flex;
+  gap: var(--fa-space-md);
+  padding: var(--fa-space-md);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(0, 216, 255, 0.05));
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: var(--fa-radius-lg);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
+  align-items: center;
+}
+
+.ai-insight-banner__icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.5));
+}
+
+.ai-insight-banner__content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--fa-space-xs);
+  gap: 8px;
 }
+
+.ai-insight-banner__text {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--fa-text-primary);
+  font-weight: 500;
+}
+
+.ai-insight-banner__cta {
+  align-self: flex-start;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-insight-banner__cta:hover {
+  background: rgba(168, 85, 247, 0.3);
+  transform: translateX(2px);
+}
+
+/* ── Grid ───────────────────────────────────────────────────── */
 
 .pulse-dashboard__grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: var(--fa-space-md);
 }
 
-@media (min-width: 400px) {
-  .pulse-dashboard__grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  /* Let the last card span full width if odd number */
-  .pulse-dashboard__grid > :last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-  }
+/* ── Pulsing Effect for Critical Cards ──────────────────────── */
+
+@keyframes pulse-critical {
+  0% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 51, 102, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0); }
+}
+
+.cashflow-card--critical {
+  animation: pulse-critical 2s infinite;
+}
+
+/* ── History Section ────────────────────────────────────────── */
+
+.pulse-dashboard__history-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fa-space-sm);
+  margin-top: var(--fa-space-sm);
+}
+
+.section-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--fa-text-muted);
+  letter-spacing: 0.1em;
+  padding-left: 4px;
+}
+
+.history-chart-wrapper {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--fa-radius-lg);
+  padding: var(--fa-space-sm) 0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ── Warning Banner ────────────────────────────────────────── */
+
+.pulse-dashboard__warning-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--fa-space-md);
+  padding: var(--fa-space-md);
+  background: rgba(255, 51, 102, 0.1);
+  border: 1px solid rgba(255, 51, 102, 0.2);
+  border-radius: var(--fa-radius-lg);
+}
+
+.pulse-dashboard__warning-icon {
+  font-size: 1.25rem;
+}
+
+.pulse-dashboard__warning-title {
+  display: block;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #FF3366;
+}
+
+.pulse-dashboard__warning-desc {
+  font-size: 0.7rem;
+  color: var(--fa-text-secondary);
 }

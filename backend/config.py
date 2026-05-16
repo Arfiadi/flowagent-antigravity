@@ -41,13 +41,17 @@ class Settings:
     GEMINI_THINK_MODEL: str = os.getenv("GEMINI_THINK_MODEL", "gemini-2.5-pro")
 
     def validate(self) -> None:
-        """Validate that all required settings are present."""
+        """Validate that essential settings are present."""
         if not self.FIREBASE_PROJECT_ID:
             raise ValueError("FIREBASE_PROJECT_ID is required in .env")
-        if not os.path.exists(self.GOOGLE_APPLICATION_CREDENTIALS):
-            raise FileNotFoundError(
-                f"Credentials file not found: {self.GOOGLE_APPLICATION_CREDENTIALS}"
-            )
+        
+        # In production (Cloud Run), we might not have a service_account.json file
+        # as we use the Default Service Account. We only validate if specified.
+        if self.GOOGLE_APPLICATION_CREDENTIALS != "service_account.json":
+            if not os.path.exists(self.GOOGLE_APPLICATION_CREDENTIALS):
+                raise FileNotFoundError(
+                    f"Credentials file not found: {self.GOOGLE_APPLICATION_CREDENTIALS}"
+                )
 
 
 @lru_cache(maxsize=1)
@@ -80,8 +84,15 @@ def get_firestore_client() -> firestore.client:
     """Return cached Firestore client singleton."""
     settings = get_settings()
     if not firebase_admin._apps:
-        cred = credentials.Certificate(settings.GOOGLE_APPLICATION_CREDENTIALS)
-        initialize_app(cred)
+        if os.path.exists(settings.GOOGLE_APPLICATION_CREDENTIALS):
+            cred = credentials.Certificate(settings.GOOGLE_APPLICATION_CREDENTIALS)
+            initialize_app(cred)
+            logger.info("Firebase initialized with service account file.")
+        else:
+            # Fallback to Application Default Credentials (for Cloud Run)
+            initialize_app()
+            logger.info("Firebase initialized with Default Application Credentials.")
+            
     db = firestore.client()
     logger.info("Firestore client initialized (project=%s)", settings.FIREBASE_PROJECT_ID)
     return db

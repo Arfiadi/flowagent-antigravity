@@ -19,9 +19,15 @@ export function CameraModal({ onCapture, onClose }: CameraModalProps) {
   const handleCapture = () => {
     const photo = capturePhoto();
     if (photo) {
+      stopCamera();
       onCapture(photo);
       onClose();
     }
+  };
+
+  const handleCancel = () => {
+    stopCamera();
+    onClose();
   };
 
   return (
@@ -29,8 +35,8 @@ export function CameraModal({ onCapture, onClose }: CameraModalProps) {
       <GlassCard className="camera-modal">
         <div className="camera-modal__header">
           <h3 className="text-heading">Foto Nota</h3>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            Tutup
+          <Button variant="ghost" size="sm" onClick={handleCancel}>
+            ✕
           </Button>
         </div>
 
@@ -38,7 +44,6 @@ export function CameraModal({ onCapture, onClose }: CameraModalProps) {
           <div className="camera-modal__error text-critical">{error}</div>
         ) : (
           <div className="camera-modal__viewport">
-            {/* Using muted prevents some autoplay policies on iOS Safari */}
             <video ref={videoRef} autoPlay playsInline muted className="camera-modal__video" />
             <div className="camera-modal__overlay">
               <div className="scan-line" />
@@ -47,7 +52,10 @@ export function CameraModal({ onCapture, onClose }: CameraModalProps) {
         )}
 
         <div className="camera-modal__actions">
-          <Button variant="primary" size="lg" onClick={handleCapture} disabled={!!error}>
+          <Button variant="ghost" size="lg" onClick={handleCancel}>
+            Batal
+          </Button>
+          <Button variant="accent" size="lg" onClick={handleCapture} disabled={!!error}>
             📷 Ambil Foto
           </Button>
         </div>
