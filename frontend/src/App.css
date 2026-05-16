@@ -26,8 +26,35 @@
   gap: var(--fa-space-xl);
 }
 
+.app-shell__main--with-nav {
+  padding-bottom: 80px;
+}
+
 .app-shell__section {
   display: flex;
   flex-direction: column;
   gap: var(--fa-space-md);
+}
+
+.app-shell__empty-state {
+  padding: var(--fa-space-lg);
+  margin: 0 var(--fa-space-lg);
+}
+
+/* ─── Section Layout Utilities ──────────────────────────────────── */
+
+.section-heading {
+  padding: 0 var(--fa-space-lg);
+}
+
+.section-content {
+  padding: 0 var(--fa-space-lg);
+}
+
+.ingest-actions {
+  padding: 0 var(--fa-space-lg);
+  display: flex;
+  gap: var(--fa-space-md);
+  justify-content: center;
+  margin-bottom: var(--fa-space-xl);
 }
