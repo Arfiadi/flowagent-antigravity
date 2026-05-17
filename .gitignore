@@ -3,6 +3,8 @@
 .env
 .env.local
 *.log
+.firebase/
+**/.firebase/
 
 # Node (Frontend)
 frontend/node_modules/
