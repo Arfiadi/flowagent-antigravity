@@ -130,11 +130,15 @@ function IngestionView() {
         method: "POST",
         body: formData,
       });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || "Gagal mengekstrak data dari gambar/audio.");
+      }
       const data = await response.json();
       setPayload(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Extraction failed:", err);
-      alert("Gagal mengekstrak data. Pastikan backend menyala di port 8001.");
+      alert(err.message || "Gagal mengekstrak data. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -151,11 +155,16 @@ function IngestionView() {
         method: "POST",
         body: formData,
       });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || "Gagal memproses transaksi.");
+      }
       const data = await response.json();
       alert(`Berhasil! Health Score sekarang: ${data.health_score}`);
       setPayload(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Analysis failed:", err);
+      alert(err.message || "Gagal menyimpan transaksi.");
     } finally {
       setLoading(false);
     }
@@ -176,12 +185,16 @@ function IngestionView() {
         method: "POST",
         body: formData,
       });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || "Gagal mengekstrak teks.");
+      }
       const data = await response.json();
       setPayload(data);
       setTextInput("");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Text extraction failed:", err);
-      alert("Gagal memproses teks.");
+      alert(err.message || "Gagal memproses deskripsi teks.");
     } finally {
       setLoading(false);
     }
@@ -240,6 +253,7 @@ function IngestionView() {
               setPayload(null);
               setCapturedImage(null);
             }}
+            loading={loading}
           />
         ) : (
           <p className="text-caption" style={{ textAlign: "center", marginTop: "2rem" }}>

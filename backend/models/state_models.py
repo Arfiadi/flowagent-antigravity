@@ -21,7 +21,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 # ─── Literal Union Types ────────────────────────────────────────────
@@ -177,12 +177,19 @@ class Transaction(BaseModel):
     id: str = Field(description="Firestore auto-generated document ID")
     type: TransactionType
     amount: float = Field(gt=0, description="Transaction amount in IDR")
-    entity_name: str = Field(min_length=1, description="Name of counterparty")
+    entity_name: str = Field(default="Umum", description="Name of counterparty")
     category: str = Field(default="Lainnya", description="Kategori transaksi")
     due_date: Optional[str] = Field(default=None, description="ISO 8601 date or null")
     source_modality: SourceModality
     confidence_score: float = Field(ge=0, le=1, description="AI extraction confidence")
     created_at: str = Field(description="ISO 8601 datetime of creation")
+
+    @field_validator("entity_name", mode="before")
+    @classmethod
+    def clean_entity_name(cls, v: str) -> str:
+        if not v or not str(v).strip():
+            return "Umum"
+        return str(v).strip()
 
 
 # ─── Collection: agent_actions/{auto_id} ────────────────────────────
@@ -211,10 +218,17 @@ class TransactionPayload(BaseModel):
 
     type: ExtractionTransactionType
     amount: float = Field(gt=0, description="Extracted amount in IDR")
-    entity_name: str = Field(min_length=1, description="Extracted entity name")
+    entity_name: str = Field(default="Umum", description="Extracted entity name")
     category: str = Field(default="Lainnya", description="Kategori transaksi (e.g., Stok, Operasional, Gaji)")
     due_date: Optional[str] = Field(default=None, description="ISO 8601 date or null")
     confidence_score: float = Field(ge=0, le=1, description="Model confidence")
+
+    @field_validator("entity_name", mode="before")
+    @classmethod
+    def clean_entity_name(cls, v: str) -> str:
+        if not v or not str(v).strip():
+            return "Umum"
+        return str(v).strip()
 
     def requires_manual_review(self) -> bool:
         """Returns True if confidence is below the guardrail threshold."""

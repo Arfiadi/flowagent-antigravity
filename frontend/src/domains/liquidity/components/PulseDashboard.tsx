@@ -37,15 +37,23 @@ const liquidityHistory = [
 export function PulseDashboard({ state }: PulseDashboardProps) {
   // Defensive destructuring with defaults
   const { 
-    liquid_assets = { cash_on_hand: 0, bank_balance: 0 }, 
-    trapped_capital = { receivables_total: 0, dead_stock_value: 0 }, 
-    liabilities = { payables_total: 0, upcoming_opex: 0 }, 
-    ai_metrics = { health_score: 0, cash_runway_days: 0, gross_revenue: 0, net_margin: 0, liquidity_risk_level: "low" } 
+    liquid_assets = { cash_on_hand: 0, bank_balance: 0, uncategorized_inflows: 0, last_updated: new Date().toISOString() }, 
+    trapped_capital = { receivables_total: 0, dead_stock_value: 0, inventory_estimate: 0, receivables: [], aging_receivables_metrics: { below_15d: 0, "15d_to_30d": 0, above_30d: 0 } }, 
+    liabilities = { payables_total: 0, upcoming_opex: 0, payables: [] }, 
+    ai_metrics = { health_score: 0, cash_runway_days: 0, gross_revenue: 0, net_margin: 0, liquidity_risk_level: "low", days_sales_outstanding_dso: 0 } 
   } = state || {};
 
   const navigate = useNavigate();
   const totalCash = (liquid_assets.cash_on_hand || 0) + (liquid_assets.bank_balance || 0);
   const totalTrapped = (trapped_capital.receivables_total || 0) + (trapped_capital.inventory_estimate || 0);
+
+  // Calculate dynamic breakdown percentages for receivables vs inventory stock
+  let piutangPercent = 0;
+  let stokPercent = 0;
+  if (totalTrapped > 0) {
+    piutangPercent = Math.round(((trapped_capital.receivables_total || 0) / totalTrapped) * 100);
+    stokPercent = 100 - piutangPercent; // Ensure it adds up perfectly to 100%
+  }
 
   return (
     <section className="pulse-dashboard fade-slide-up">
@@ -102,9 +110,9 @@ export function PulseDashboard({ state }: PulseDashboardProps) {
           color="warning"
           progressBar={{
             labelA: "Piutang",
-            percentA: 70,
+            percentA: piutangPercent,
             labelB: "Stok",
-            percentB: 30
+            percentB: stokPercent
           }}
         />
         <CashFlowCard

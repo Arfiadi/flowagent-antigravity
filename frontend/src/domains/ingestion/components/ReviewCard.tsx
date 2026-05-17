@@ -25,6 +25,8 @@ interface ReviewCardProps {
   capturedImage?: string | null;
   /** Called when user discards the extraction result */
   onCancel?: () => void;
+  /** State indicating if submission is in progress */
+  loading?: boolean;
 }
 
 const TYPE_LABELS: Record<TransactionPayload["type"], string> = {
@@ -45,7 +47,7 @@ const TYPE_ICONS: Record<TransactionPayload["type"], string> = {
   payable_paid: "💸",
 };
 
-export function ReviewCard({ payload: initialPayload, onApprove, capturedImage, onCancel }: ReviewCardProps) {
+export function ReviewCard({ payload: initialPayload, onApprove, capturedImage, onCancel, loading = false }: ReviewCardProps) {
   const [edited, setEdited] = useState(initialPayload);
   const [notes, setNotes] = useState("");
 
@@ -53,6 +55,7 @@ export function ReviewCard({ payload: initialPayload, onApprove, capturedImage, 
   const todayStr = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 
   const handleApprove = () => {
+    if (loading) return;
     onApprove(edited);
   };
 
@@ -101,6 +104,7 @@ export function ReviewCard({ payload: initialPayload, onApprove, capturedImage, 
                 className="review-card__cancel-btn"
                 onClick={onCancel}
                 title="Batalkan Ekstraksi"
+                disabled={loading}
               >
                 ✕
               </button>
@@ -134,6 +138,7 @@ export function ReviewCard({ payload: initialPayload, onApprove, capturedImage, 
                 className="review-card__field-input"
                 value={edited.entity_name}
                 onChange={(e) => setEdited({ ...edited, entity_name: e.target.value })}
+                disabled={loading}
               />
             </div>
           </div>
@@ -159,6 +164,7 @@ export function ReviewCard({ payload: initialPayload, onApprove, capturedImage, 
                   const num = Number(e.target.value.replace(/[^0-9]/g, ""));
                   if (!isNaN(num)) setEdited({ ...edited, amount: num });
                 }}
+                disabled={loading}
               />
               {isLowConfidence && <span style={{ color: "var(--fa-color-warning)" }}>⚠</span>}
             </div>
@@ -175,6 +181,7 @@ export function ReviewCard({ payload: initialPayload, onApprove, capturedImage, 
                 placeholder="Misal: Stok, Operasional"
                 value={edited.category}
                 onChange={(e) => setEdited({ ...edited, category: e.target.value })}
+                disabled={loading}
               />
             </div>
           </div>
@@ -194,15 +201,21 @@ export function ReviewCard({ payload: initialPayload, onApprove, capturedImage, 
               placeholder="*Optional field text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              disabled={loading}
             />
           </div>
         </div>
 
         {/* Full-width CTA */}
-        <button className="review-card__approve-btn" onClick={handleApprove}>
-          📡 SETUJU DAN SIMPAN
+        <button 
+          className="review-card__approve-btn" 
+          onClick={handleApprove}
+          disabled={loading}
+        >
+          {loading ? "📡 MENYIMPAN..." : "📡 SETUJU DAN SIMPAN"}
         </button>
       </GlassCard>
     </div>
   );
 }
+
