@@ -10,6 +10,11 @@ FlowAgent adalah platform AI Agentic mutakhir yang dirancang untuk memberdayakan
 - **UI/UX Modern & Responsif**: Dirancang menggunakan React, Tailwind CSS, dan komponen shadcn/ui untuk pengalaman pengguna yang premium, estetik, dan dinamis.
 - **Backend Skalabel**: API REST berbasis FastAPI dan runtime agent yang siap berjalan secara konkuren, di-deploy di Google Cloud Run untuk kinerja maksimal dan penskalaan otomatis.
 
+## 🌐 Live Demo & Deployment
+Aplikasi FlowAgent telah di-deploy secara *live* dan dapat diakses melalui tautan berikut:
+- **Frontend (Aplikasi Web)**: [https://gen-lang-client-0964227719.web.app](https://gen-lang-client-0964227719.web.app)
+- **Backend (API Base URL)**: [https://flowagent-api-737275753890.us-central1.run.app](https://flowagent-api-737275753890.us-central1.run.app)
+
 ## 🏗️ Arsitektur & Stack Teknologi
 
 ### Frontend
@@ -33,6 +38,15 @@ FlowAgent adalah platform AI Agentic mutakhir yang dirancang untuk memberdayakan
 - Python (v3.10 atau lebih baru)
 - Firebase CLI
 - Google Cloud SDK (opsional, untuk deployment manual)
+
+### Menjalankan Aplikasi Secara Cepat (Satu Klik - Khusus Windows)
+Kami telah menyediakan skrip terpadu untuk menjalankan backend dan frontend secara otomatis:
+1. Pastikan Anda telah melakukan instalasi pustaka (`npm install` di `frontend` dan `pip install` di `backend/venv` sesuai petunjuk manual di bawah).
+2. Klik dua kali pada file **`run_local.bat`** melalui File Explorer, atau jalankan melalui terminal: `.\run_local.bat`
+3. Jendela terminal baru akan terbuka secara otomatis untuk masing-masing server (Backend di port 8000, Frontend di port 5173).
+4. Untuk **mematikan semua server sekaligus**, cukup tekan sembarang tombol di jendela terminal utama `run_local.bat`.
+
+*Bila Anda lebih memilih menjalankan komponen secara manual, ikuti langkah-langkah di bawah ini:*
 
 ### 1. Kloning Repositori
 ```bash
