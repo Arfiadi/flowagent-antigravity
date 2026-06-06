@@ -89,11 +89,20 @@ export interface AiMetrics {
   days_sales_outstanding_dso: number;
 }
 
+export interface BusinessProfile {
+  business_name: string;
+  business_type: string;
+  location: string;
+  employee_count: number;
+  primary_focus: string;
+}
+
 export interface BusinessState {
   liquid_assets: LiquidAssets;
   trapped_capital: TrappedCapital;
   liabilities: Liabilities;
   ai_metrics: AiMetrics;
+  profile: BusinessProfile;
 }
 
 // ─── Collection: transactions/{auto_id} ─────────────────────────────

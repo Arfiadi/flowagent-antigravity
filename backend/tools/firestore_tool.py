@@ -22,7 +22,8 @@ from firebase_admin import firestore
 from config import get_firestore_client
 from models import (
     BusinessState, TransactionPayload, AgentAction,
-    LiquidAssets, TrappedCapital, Liabilities, AiMetrics
+    LiquidAssets, TrappedCapital, Liabilities, AiMetrics,
+    BusinessProfile
 )
 
 logger = logging.getLogger("flowagent.tools.firestore")
@@ -151,7 +152,8 @@ def set_initial_state(uid: str, cash: int, bank: int, inventory: int, receivable
                 gross_revenue=0,
                 net_margin=0,
                 days_sales_outstanding_dso=0
-            )
+            ),
+            profile=BusinessProfile()
         )
         
         # Convert to raw dict for the recalculation engine
@@ -167,6 +169,41 @@ def set_initial_state(uid: str, cash: int, bank: int, inventory: int, receivable
 
     transaction = db.transaction()
     return _do_set(transaction)
+
+
+def update_business_profile(
+    uid: str,
+    business_name: str,
+    business_type: str,
+    location: str,
+    employee_count: int,
+    primary_focus: str
+) -> dict:
+    """
+    Updates the business profile inside business_state.
+    """
+    db = get_firestore_client()
+    state_ref = db.collection("business_state").document(uid)
+
+    @firestore.transactional
+    def _do_update(transaction):
+        doc = state_ref.get(transaction=transaction)
+        if not doc.exists:
+            raise ValueError(f"business_state not found for uid={uid}")
+        
+        state = doc.to_dict()
+        state.setdefault("profile", {})
+        state["profile"]["business_name"] = business_name
+        state["profile"]["business_type"] = business_type
+        state["profile"]["location"] = location
+        state["profile"]["employee_count"] = employee_count
+        state["profile"]["primary_focus"] = primary_focus
+        
+        transaction.set(state_ref, state)
+        return state
+
+    transaction = db.transaction()
+    return _do_update(transaction)
 
 
 def write_transaction(uid: str, payload: TransactionPayload, modality: str = "photo") -> str:

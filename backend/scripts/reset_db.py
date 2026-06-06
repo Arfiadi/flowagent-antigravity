@@ -14,6 +14,12 @@ from config import get_firestore_client
 from firebase_admin import firestore
 
 def reset_database(uid: str = "test-user-v050"):
+    import sys
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
+        
     db = get_firestore_client()
     print(f"🚀 Starting database reset for user: {uid}")
 
@@ -69,6 +75,13 @@ def reset_database(uid: str = "test-user-v050"):
             "gross_revenue": 0,
             "net_margin": 0,
             "days_sales_outstanding_dso": 0
+        },
+        "profile": {
+            "business_name": "",
+            "business_type": "",
+            "location": "",
+            "employee_count": 0,
+            "primary_focus": ""
         }
     }
     

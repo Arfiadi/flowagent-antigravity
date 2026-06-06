@@ -108,7 +108,7 @@ function Layout() {
 
 // ─── Ingestion View ─────────────────────────────────────────────────
 
-function IngestionView() {
+export function IngestionView() {
   const [showCamera, setShowCamera] = useState(false);
   const [showVoice, setShowVoice] = useState(false);
   const [payload, setPayload] = useState<TransactionPayload | null>(null);
@@ -282,7 +282,7 @@ function IngestionView() {
   );
 }
 
-function AgentView() {
+export function AgentView() {
   const { actions, loading, error, updateActionStatus } = useAgentActions("test-user-v050");
 
   if (error) {

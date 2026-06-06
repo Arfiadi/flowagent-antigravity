@@ -15,6 +15,15 @@ export function ProfileView() {
   const { state, loading } = useBusinessState();
   const navigate = useNavigate();
 
+  // Safely extract profile details with hardcoded fallback values for clean onboarding
+  const profile = state?.profile || {
+    business_name: "Toko Sejahtera",
+    business_type: "Distributor Sembako & Ritel",
+    location: "Bandung, Jawa Barat",
+    employee_count: 3,
+    primary_focus: "Perputaran Kas Cepat",
+  };
+
   // Setup Modal State
   const [isSetupOpen, setIsSetupOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,6 +32,17 @@ export function ProfileView() {
     inventory: 0,
     receivables: 0,
   });
+
+  // Profile Modal State
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [profileFormData, setProfileFormData] = useState({
+    business_name: "",
+    business_type: "",
+    location: "",
+    employee_count: 0,
+    primary_focus: "",
+  });
+
   const [isSaving, setIsSaving] = useState(false);
 
   const handleLogout = () => {
@@ -32,6 +52,17 @@ export function ProfileView() {
 
   const handleComingSoon = () => {
     alert("Fitur ini sedang dalam tahap pengembangan (Coming Soon)");
+  };
+
+  const handleOpenProfileModal = () => {
+    setProfileFormData({
+      business_name: profile.business_name || "",
+      business_type: profile.business_type || "",
+      location: profile.location || "",
+      employee_count: profile.employee_count || 0,
+      primary_focus: profile.primary_focus || "",
+    });
+    setIsProfileOpen(true);
   };
 
   const handleSaveInitialSetup = async (e: React.FormEvent) => {
@@ -56,6 +87,37 @@ export function ProfileView() {
       
       alert("Saldo awal berhasil disimpan!");
       setIsSetupOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi kesalahan saat menyimpan data.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+
+    try {
+      const apiBase = import.meta.env.VITE_API_URL || "http://localhost:8000";
+      const body = new URLSearchParams();
+      body.append("uid", "test-user-v050");
+      body.append("business_name", profileFormData.business_name);
+      body.append("business_type", profileFormData.business_type);
+      body.append("location", profileFormData.location);
+      body.append("employee_count", profileFormData.employee_count.toString());
+      body.append("primary_focus", profileFormData.primary_focus);
+
+      const res = await fetch(`${apiBase}/api/profile-setup`, {
+        method: "POST",
+        body: body,
+      });
+
+      if (!res.ok) throw new Error("Gagal menyimpan profil bisnis");
+      
+      alert("Profil bisnis berhasil disimpan!");
+      setIsProfileOpen(false);
     } catch (err) {
       console.error(err);
       alert("Terjadi kesalahan saat menyimpan data.");
@@ -105,8 +167,8 @@ export function ProfileView() {
         <div className="profile-view__avatar">
           <span className="profile-view__avatar-icon">🏪</span>
         </div>
-        <h1 className="profile-view__title">Toko Sejahtera</h1>
-        <p className="profile-view__subtitle text-caption">Distributor Sembako & Ritel</p>
+        <h1 className="profile-view__title">{profile.business_name || "Toko Sejahtera"}</h1>
+        <p className="profile-view__subtitle text-caption">{profile.business_type || "Distributor Sembako & Ritel"}</p>
       </div>
 
       <div className="profile-view__content">
@@ -119,21 +181,21 @@ export function ProfileView() {
                 <span className="profile-list__icon">📍</span>
                 <div className="profile-list__text">
                   <span className="profile-list__label">Lokasi</span>
-                  <span className="profile-list__value">Bandung, Jawa Barat</span>
+                  <span className="profile-list__value">{profile.location || "Bandung, Jawa Barat"}</span>
                 </div>
               </div>
               <div className="profile-list__item">
                 <span className="profile-list__icon">👥</span>
                 <div className="profile-list__text">
                   <span className="profile-list__label">Karyawan Aktif</span>
-                  <span className="profile-list__value">3 Orang</span>
+                  <span className="profile-list__value">{profile.employee_count} Orang</span>
                 </div>
               </div>
               <div className="profile-list__item">
                 <span className="profile-list__icon">🎯</span>
                 <div className="profile-list__text">
                   <span className="profile-list__label">Fokus Utama</span>
-                  <span className="profile-list__value">Perputaran Kas Cepat</span>
+                  <span className="profile-list__value">{profile.primary_focus || "Perputaran Kas Cepat"}</span>
                 </div>
               </div>
             </div>
@@ -183,7 +245,7 @@ export function ProfileView() {
               <span className="settings-btn__label">Atur Saldo Awal</span>
               <span className="settings-btn__arrow">›</span>
             </button>
-            <button className="settings-btn" onClick={handleComingSoon}>
+            <button className="settings-btn" onClick={handleOpenProfileModal}>
               <span className="settings-btn__icon">⚙️</span>
               <span className="settings-btn__label">Pengaturan Akun</span>
               <span className="settings-btn__arrow">›</span>
@@ -281,6 +343,87 @@ export function ProfileView() {
                   disabled={isSaving}
                 >
                   {isSaving ? "Menyimpan..." : "Simpan Saldo"}
+                </button>
+              </div>
+            </form>
+          </GlassCard>
+        </div>
+      )}
+
+      {/* ── Profile Setup Modal Overlay ────────────────────────────── */}
+      {isProfileOpen && (
+        <div className="setup-overlay">
+          <GlassCard variant="default" className="setup-modal fade-slide-up">
+            <h2 className="setup-modal__title">Pengaturan Akun & Bisnis</h2>
+            <p className="setup-modal__subtitle">Lengkapi profil bisnis Anda sebagai konteks analisis AI.</p>
+            
+            <form onSubmit={handleSaveProfile} className="setup-form">
+              <div className="setup-form__group">
+                <label>Nama Toko / Bisnis</label>
+                <input 
+                  type="text" 
+                  value={profileFormData.business_name}
+                  onChange={(e) => setProfileFormData({...profileFormData, business_name: e.target.value})}
+                  placeholder="Contoh: Toko Sejahtera"
+                  required
+                />
+              </div>
+              <div className="setup-form__group">
+                <label>Tipe / Kategori Bisnis</label>
+                <input 
+                  type="text" 
+                  value={profileFormData.business_type}
+                  onChange={(e) => setProfileFormData({...profileFormData, business_type: e.target.value})}
+                  placeholder="Contoh: Distributor Sembako & Ritel"
+                  required
+                />
+              </div>
+              <div className="setup-form__group">
+                <label>Lokasi Bisnis</label>
+                <input 
+                  type="text" 
+                  value={profileFormData.location}
+                  onChange={(e) => setProfileFormData({...profileFormData, location: e.target.value})}
+                  placeholder="Contoh: Bandung, Jawa Barat"
+                  required
+                />
+              </div>
+              <div className="setup-form__group">
+                <label>Jumlah Karyawan Aktif</label>
+                <input 
+                  type="number" 
+                  value={profileFormData.employee_count}
+                  onChange={(e) => setProfileFormData({...profileFormData, employee_count: parseInt(e.target.value) || 0})}
+                  placeholder="Contoh: 3"
+                  min="0"
+                  required
+                />
+              </div>
+              <div className="setup-form__group">
+                <label>Fokus Utama Bisnis</label>
+                <input 
+                  type="text" 
+                  value={profileFormData.primary_focus}
+                  onChange={(e) => setProfileFormData({...profileFormData, primary_focus: e.target.value})}
+                  placeholder="Contoh: Perputaran Kas Cepat"
+                  required
+                />
+              </div>
+
+              <div className="setup-form__actions">
+                <button 
+                  type="button" 
+                  className="setup-btn setup-btn--secondary"
+                  onClick={() => setIsProfileOpen(false)}
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  className="setup-btn setup-btn--primary"
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Menyimpan..." : "Simpan Profil"}
                 </button>
               </div>
             </form>

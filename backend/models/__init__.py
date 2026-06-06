@@ -12,6 +12,7 @@ from .state_models import (
     AgentAction,
     TransactionPayload,
     CONFIDENCE_THRESHOLD,
+    BusinessProfile,
 )
 
 __all__ = [
@@ -26,4 +27,5 @@ __all__ = [
     "AgentAction",
     "TransactionPayload",
     "CONFIDENCE_THRESHOLD",
+    "BusinessProfile",
 ]

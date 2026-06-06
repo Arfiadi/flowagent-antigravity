@@ -25,6 +25,7 @@ from tools.firestore_tool import (
     write_transaction,
     write_action,
     set_initial_state,
+    update_business_profile,
 )
 from tools.action_tool import generate_action_draft
 
@@ -163,6 +164,8 @@ async def extract_transaction(
         )
         return payload
 
+    except HTTPException as exc:
+        raise exc
     except ValueError as exc:
         logger.error("Extraction validation failed: %s", exc)
         raise HTTPException(status_code=422, detail=str(exc))
@@ -267,6 +270,38 @@ async def initial_setup(
     except Exception as exc:
         logger.error("Initial setup error: %s", exc)
         raise HTTPException(status_code=500, detail="Failed to set initial state")
+
+
+@app.post("/api/profile-setup")
+async def profile_setup(
+    uid: str = Form("test-user-v050"),
+    business_name: str = Form(...),
+    business_type: str = Form(...),
+    location: str = Form(...),
+    employee_count: int = Form(...),
+    primary_focus: str = Form(...),
+):
+    """
+    Endpoint to update business profile context.
+    """
+    logger.info("Profile setup request for uid=%s, name=%s", uid, business_name)
+    try:
+        updated_state = update_business_profile(
+            uid,
+            business_name,
+            business_type,
+            location,
+            employee_count,
+            primary_focus,
+        )
+        return updated_state
+    except ValueError as exc:
+        logger.error("Profile validation error: %s", exc)
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        logger.error("Profile setup error: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to update business profile")
+
 
 @app.post("/api/reset")
 async def reset_data(uid: str = Form("test-user-v050")):

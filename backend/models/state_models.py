@@ -155,6 +155,16 @@ class AiMetrics(BaseModel):
     )
 
 
+class BusinessProfile(BaseModel):
+    """Konteks profil bisnis yang diatur oleh user dan digunakan oleh AI."""
+
+    business_name: str = Field(default="", description="Nama Toko/Bisnis")
+    business_type: str = Field(default="", description="Tipe/Kategori Bisnis")
+    location: str = Field(default="", description="Lokasi Bisnis")
+    employee_count: int = Field(default=0, ge=0, description="Jumlah Karyawan")
+    primary_focus: str = Field(default="", description="Fokus Utama Bisnis")
+
+
 class BusinessState(BaseModel):
     """Singleton document per user representing real-time liquidity snapshot.
 
@@ -166,6 +176,7 @@ class BusinessState(BaseModel):
     trapped_capital: TrappedCapital
     liabilities: Liabilities
     ai_metrics: AiMetrics
+    profile: BusinessProfile = Field(default_factory=BusinessProfile)
 
 
 # ─── Collection: transactions/{auto_id} ─────────────────────────────

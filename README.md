@@ -1,44 +1,85 @@
-# FlowAgent 🚀
-**Autonomous Financial Assistant for Indonesian SMEs**
+# FlowAgent - AI-Powered Financial & Business Agent
 
-FlowAgent adalah asisten keuangan berbasis **Agentic AI** yang dirancang khusus untuk membantu UMKM di Indonesia (khususnya sektor grosir/distribusi) mengelola likuiditas kas secara otonom. Sistem ini tidak hanya mencatat transaksi, tetapi "berpikir" dan "bertindak" untuk memitigasi risiko keuangan.
+FlowAgent adalah platform AI Agentic mutakhir yang dirancang untuk memberdayakan bisnis dengan analisis keuangan otonom, pelacakan metrik real-time, dan pengambilan keputusan cerdas. Dibangun dengan stack web modern yang tangguh, FlowAgent mengintegrasikan frontend React yang dinamis, backend FastAPI berkinerja tinggi, dan ekosistem Firebase untuk manajemen state yang mulus dan seketika (real-time).
 
 ## 🌟 Fitur Utama
-- **Multi-modal Ingestion (SENSE)**: Ekstraksi data transaksi secara otomatis melalui foto nota, rekaman suara, atau teks menggunakan Gemini 2.0 Flash.
-- **Autonomous Planning (THINK)**: Agent secara mandiri menganalisis kesehatan keuangan (*Health Score*) dan memutuskan apakah perlu tindakan intervensi.
-- **AI Action Center (ACT)**: Menghasilkan draf aksi nyata seperti penagihan piutang otomatis melalui WhatsApp atau negosiasi tempo ke supplier.
-- **Human-in-the-Loop (HITL)**: Semua tindakan AI tetap memerlukan persetujuan pengguna sebelum dieksekusi, menjamin keamanan finansial.
-- **Premium Dashboard**: Visualisasi *real-time* dengan skema desain *Neon Glassmorphism* yang modern.
 
-## 🏗️ Arsitektur Sistem
-FlowAgent menggunakan pola desain **SENSE-THINK-ACT**:
-1. **SENSE Layer**: Gemini 2.0 Flash mengekstrak entitas dari input berantakan menjadi skema Pydantic yang valid.
-2. **THINK Layer**: Gemini 2.0 Pro melakukan penalaran (*Inner Monologue*) terhadap *business state* saat ini.
-3. **ACT Layer**: Menggunakan **Native Function Calling** untuk menghasilkan draf aksi mitigasi dengan mekanisme *Self-Correction*.
+- **Manajemen Profil Bisnis**: Antarmuka interaktif yang memudahkan pemilik bisnis untuk mengatur dan mengelola profil, tujuan (goals), dan batasan (constraints) usaha mereka.
+- **Alur Kerja (Workflows) AI Agentic**: Memanfaatkan agent AI otonom untuk menganalisis kesehatan keuangan, mengidentifikasi modal yang terperangkap (trapped capital), dan memberikan rekomendasi optimasi.
+- **Dashboard Keuangan Real-time**: Pembaruan langsung atas aset likuid, liabilitas, dan metrik yang dihasilkan oleh AI menggunakan sistem *real-time listener* dari Firestore.
+- **UI/UX Modern & Responsif**: Dirancang menggunakan React, Tailwind CSS, dan komponen shadcn/ui untuk pengalaman pengguna yang premium, estetik, dan dinamis.
+- **Backend Skalabel**: API REST berbasis FastAPI dan runtime agent yang siap berjalan secara konkuren, di-deploy di Google Cloud Run untuk kinerja maksimal dan penskalaan otomatis.
 
-## 📂 Struktur Proyek
-- `/backend`: FastAPI Server, Agentic Tools, & Firestore Logic.
-- `/frontend`: React (Vite) PWA dengan sistem desain custom.
-- `/Proposal.pdf`: Dokumentasi konsep bisnis dan teknis lengkap.
-
-## 🚀 Cara Menjalankan
-
-### Backend
-1. Masuk ke direktori `backend`.
-2. Install dependensi: `pip install -r requirements.txt`.
-3. Salin `.env.example` ke `.env` dan isi kredensial yang diperlukan.
-4. Jalankan server: `python main.py`.
+## 🏗️ Arsitektur & Stack Teknologi
 
 ### Frontend
-1. Masuk ke direktori `frontend`.
-2. Install dependensi: `npm install`.
-3. Jalankan development server: `npm run dev`.
+- **Framework**: React 18 dengan Vite
+- **Styling**: Tailwind CSS & shadcn/ui
+- **State & Data**: Firebase SDK (Firestore Real-time Listeners)
+- **Testing**: Vitest & React Testing Library
+- **Hosting**: Firebase Hosting
 
-## 🛠️ Tech Stack
-- **AI**: Google Gemini 2.0 (Pro & Flash) via Vertex AI.
-- **Backend**: Python 3.11, FastAPI, Pydantic V2.
-- **Database**: Firebase Firestore (Real-time).
-- **Frontend**: React, Vite, Recharts, Vanilla CSS.
+### Backend
+- **Framework**: FastAPI (Python 3.10+)
+- **Database**: Firebase Admin SDK (Firestore)
+- **AI/Agents**: Agentic workflows dengan integrasi model AI terkini
+- **Testing**: Pytest
+- **Deployment**: Google Cloud Run (Docker Containerized)
 
----
-*FlowAgent — Mengubah Data Menjadi Aksi, Menghidupkan Kas UMKM.*
+## 🚀 Panduan Memulai (Getting Started)
+
+### Prasyarat (Prerequisites)
+- Node.js (v18 atau lebih baru)
+- Python (v3.10 atau lebih baru)
+- Firebase CLI
+- Google Cloud SDK (opsional, untuk deployment manual)
+
+### 1. Kloning Repositori
+```bash
+git clone https://github.com/your-org/flowagent-antigravity.git
+cd flowagent-antigravity
+```
+
+### 2. Setup Backend
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # Untuk Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Menjalankan server backend secara lokal
+uvicorn main:app --reload --port 8000
+```
+
+### 3. Setup Frontend
+```bash
+cd frontend
+npm install
+
+# Menjalankan Vite development server
+npm run dev
+```
+
+## 🧪 Testing
+
+Sistem ini memiliki *test coverage* yang sangat baik untuk memastikan setiap komponen dan logika bisnis berjalan dengan benar.
+
+### Backend Tests
+```bash
+cd backend
+pytest
+```
+
+### Frontend Tests
+```bash
+cd frontend
+npm run test
+```
+
+## 📦 Deployment
+
+- **Backend**: Di-deploy sebagai microservice di Google Cloud Run. (`gcloud run deploy`)
+- **Frontend**: Di-deploy sebagai SPA (Single Page Application) di Firebase Hosting. (`firebase deploy --only hosting`)
+
+## 🛡️ Lisensi & Hak Cipta
+Hak Cipta Dilindungi. Kode ini adalah milik eksklusif dan tidak untuk didistribusikan secara publik tanpa izin.

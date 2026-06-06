@@ -26,8 +26,16 @@ export function HealthScoreRing({ score }: HealthScoreRingProps) {
   // Calculate offset: 0% = full circumference, 100% = 0 offset
   const offset = GAUGE_CIRCUMFERENCE - (percentage / 100) * GAUGE_CIRCUMFERENCE;
 
+  // Determine risk level based on normalizedScore: Green (>= 3.5), Amber (>= 1.5 and < 3.5), Red (< 1.5)
+  let riskLevel: 'green' | 'amber' | 'red' = 'green';
+  if (normalizedScore < 1.5) {
+    riskLevel = 'red';
+  } else if (normalizedScore < 3.5) {
+    riskLevel = 'amber';
+  }
+
   return (
-    <div className="health-gauge">
+    <div className={`health-gauge health-gauge--${riskLevel}`}>
       <svg className="health-gauge__svg" viewBox="0 0 200 120">
         <defs>
           <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
